@@ -36,12 +36,23 @@ def spread(args):
         subprocess.run([f'python3 toolkit/wind.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
     return True
 
+def scan(args):
+    res = get_fqdns(args)
+    fqdn_json = json.loads(res.text)
+    sorted_fqdns = sort_fqdns(fqdn_json)
+    for fqdn in sorted_fqdns:
+        seed = fqdn['fqdn']
+        subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t templates'], shell=True)
+        subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 10'], shell=True)
+    return True
+
 def arg_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('-S','--server', help='IP Address of MongoDB API', required=True)
     parser.add_argument('-P','--port', help='Port of MongoDB API', required=True)
     parser.add_argument('--start', help='Run Fire-Starter Modules', required=False, action='store_true')
     parser.add_argument('--spread', help='Run Fire-Spreader Modules (Expect a LONG scan time)', required=False, action='store_true')
+    parser.add_argument('--scan', help='Run Vuln Scan Modules', required=False, action='store_true')
     return parser.parse_args()
 
 def main(args):
@@ -52,7 +63,9 @@ def main(args):
         start(args)
     if args.spread is True:
         spread(args)
-    if args.start is False and args.spread is False:
+    if args.scan is True:
+        scan(args)
+    if args.start is False and args.spread is False and args.scan is False:
         print("[!] Please Choose a Module!\n[!] Options:\n\n   --start   [Run Fire-Starter Modules]\n   --spread  [Run Fire-Spreader Modules] (Expect a LONG scan time)\n   --scan    [Run Vuln Scan Modules]\n")
     print("[+] Done!")
 
