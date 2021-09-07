@@ -42,6 +42,7 @@ def scan(args):
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
         seed = fqdn['fqdn']
+        print(f"[-] Scanning {seed}")
         subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t templates'], shell=True)
         subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 10'], shell=True)
     return True
