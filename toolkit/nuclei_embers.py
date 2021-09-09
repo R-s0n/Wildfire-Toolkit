@@ -86,10 +86,11 @@ try:
     runtime_seconds = math.floor(end - start)
     runtime_minutes = math.floor(runtime_seconds / 60)
     target_count = len(urls)
-    message_json = {'text':f'Nuclei Scan Completed!\n\nResults:\nWeb Servers Scanned: {target_count}\nRood/Seed Targeted: {fqdn}\nTemplate Category: {template}\nImpactful Results: {non_info_counter}\nInformational Results: {info_counter}\nScan Time: {runtime_minutes} minutes\nReport Location: {home_dir}/Reports/{template}-{now}.json\n\nNothing wrong with a little Spray and Pray!!  :pray:','username':'Vuln Disco Box','icon_emoji':':dart:'}
-    f = open(f'{home_dir}/.keys/slack_web_hook')
-    token = f.read()
-    slack_auto = requests.post(f'https://hooks.slack.com/services/{token}', json=message_json)     
+    if non_info_counter > 0:
+        message_json = {'text':f'Nuclei Scan Completed!\n\nResults:\nWeb Servers Scanned: {target_count}\nRood/Seed Targeted: {fqdn}\nTemplate Category: {template}\nImpactful Results: {non_info_counter}\nInformational Results: {info_counter}\nScan Time: {runtime_minutes} minutes\nReport Location: {home_dir}/Reports/{template}-{now}.json\n\nNothing wrong with a little Spray and Pray!!  :pray:','username':'Vuln Disco Box','icon_emoji':':dart:'}
+        f = open(f'{home_dir}/.keys/slack_web_hook')
+        token = f.read()
+        slack_auto = requests.post(f'https://hooks.slack.com/services/{token}', json=message_json)     
 except Exception as e:
     f = open(f"{home_dir}/Logs/automation.log", "a")
     f.write(f"Nuclei - Template: {template} - No Results Found\n")
