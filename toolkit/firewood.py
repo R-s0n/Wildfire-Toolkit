@@ -69,29 +69,37 @@ for subdomain in subdomainArr:
 f = open("/tmp/dnmasscan.tmp", "w")
 f.write(consolidatedStr)
 f.close()
-dnmasscan_results = subprocess.run([f"cd {home_dir}/Tools/dnmasscan; sudo ./dnmasscan /tmp/dnmasscan.tmp /tmp/dns.log -p1-65535 -oJ /tmp/masscan.json --rate=100000"], shell=True)
+dnmasscan_results = subprocess.run([f"cd {home_dir}/Tools/dnmasscan; sudo ./dnmasscan /tmp/dnmasscan.tmp /tmp/dns.log -p1-65535 -oJ /tmp/masscan.json --rate=100000"], stderr=subprocess.PIPE, text=True, shell=True)
+if "FAIL" in dnmasscan_results.stderr:
+    print("[!] Masscan failed!  Attempting to fix the issue...")
+    subprocess.run(["sed -i '1d' /tmp/dnmasscan.tmp"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
+    subprocess.run([f"cd {home_dir}/Tools/dnmasscan; sudo ./dnmasscan /tmp/dnmasscan.tmp /tmp/dns.log -p1-65535 -oJ /tmp/masscan.json --rate=100000"], shell=True)
 subprocess.run(["rm /tmp/dnmasscan.tmp"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
 f = open("/tmp/masscan.json", "r")
-masscan_data = json.load(f)
-print("[+] Dnmasscan completed successfully!")
-print("[-] Packaging data for database optimization...")
-data_arr = []
-for server in masscan_data:
-    data_arr.append(f"{server['ip']}:{server['ports'][0]['port']}")
-thisFqdn['recon']['subdomains']['masscan'] = data_arr
-added = []
-removed = []
-for server in data_arr:
-    if server not in old_masscan_arr:
-        added.append(server)
-for server in old_masscan_arr:
-    if server not in data_arr:
-        removed.append(server)
-thisFqdn['recon']['subdomains']['masscanAdded'] = added
-thisFqdn['recon']['subdomains']['masscanRemoved'] = removed
-r = requests.post(f'http://{server_ip}:{server_port}/api/auto/update', json=thisFqdn, headers={'Content-type':'application/json'})
-
-if r.status_code == 200:
-    print("[+] Firewood.py completed successfully!")
+data = f.read()
+if len(data) < 1:
+    print("[!] DNMasscan returned no results.  Exiting...")
 else:
-    print("[!] Firewood.py did NOT complete successfully!")
+    masscan_data = json.loads(data)
+    f.close()
+    print("[+] Dnmasscan completed successfully!")
+    print("[-] Packaging data for database optimization...")
+    data_arr = []
+    for server in masscan_data:
+        data_arr.append(f"{server['ip']}:{server['ports'][0]['port']}")
+    thisFqdn['recon']['subdomains']['masscan'] = data_arr
+    added = []
+    removed = []
+    for server in data_arr:
+        if server not in old_masscan_arr:
+            added.append(server)
+    for server in old_masscan_arr:
+        if server not in data_arr:
+            removed.append(server)
+    thisFqdn['recon']['subdomains']['masscanAdded'] = added
+    thisFqdn['recon']['subdomains']['masscanRemoved'] = removed
+    r = requests.post(f'http://{server_ip}:{server_port}/api/auto/update', json=thisFqdn, headers={'Content-type':'application/json'})
+    if r.status_code == 200:
+        print("[+] Firewood.py completed successfully!")
+    else:
+        print("[!] Firewood.py did NOT complete successfully!")

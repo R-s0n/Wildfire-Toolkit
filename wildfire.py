@@ -22,6 +22,7 @@ def start(args):
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
         seed = fqdn['fqdn']
+        print(f"[-] Running Fire-Starter Modules (Subdomain Recon) against {seed}")
         subprocess.run([f'python3 toolkit/fire_starter.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
         subprocess.run([f'python3 toolkit/kindling.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
     return True
@@ -32,6 +33,7 @@ def spread(args):
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
         seed = fqdn['fqdn']
+        print(f"[-] Running Fire-Spreader Modules (Server/Port Recon) against {seed}")
         subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
         subprocess.run([f'python3 toolkit/wind.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
     return True
@@ -42,9 +44,10 @@ def scan(args):
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
         seed = fqdn['fqdn']
-        print(f"[-] Scanning {seed}")
+        print(f"[-] Running Drifting-Embers Modules (Vuln Scanning) against {seed}")
         subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t templates'], shell=True)
-        subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 3'], shell=True)
+        subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+        subprocess.run([f'python3 toolkit/cve_embers.py -d {seed} -S {args.server} -P {args.port} --js -p react-draft-wysiwyg'], shell=True)
     return True
 
 def arg_parse():
@@ -60,9 +63,9 @@ def main(args):
     if args.start is True and args.spread is True:
         start(args)
         spread(args)
-    if args.start is True:
+    elif args.start is True and args.spread is False:
         start(args)
-    if args.spread is True:
+    elif args.spread is True and args.start is False:
         spread(args)
     if args.scan is True:
         scan(args)

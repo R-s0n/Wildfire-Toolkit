@@ -1,6 +1,7 @@
 import requests, argparse, subprocess, sys, json, math, threading
 from bs4 import BeautifulSoup
 from time import sleep
+from datetime import datetime
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
 
 script_links = []
@@ -83,17 +84,16 @@ def crawl_links(fqdn, depth):
                 return len(links)
             counter += 1
 
-def clean_urls(fqdn_list):
+def clean_urls(url_list):
     clean_url_list = []
-    for fqdn in fqdn_list:
-        for url in fqdn:
-            if "?" in url:
-                url_split = url.split("?")
-                if url_split[0] not in clean_url_list:
-                    clean_url_list.append(url_split[0])
-            else:
-                if url not in clean_url_list:
-                    clean_url_list.append(url)
+    for url in url_list:
+        if "?" in url:
+            url_split = url.split("?")
+            if url_split[0] not in clean_url_list:
+                clean_url_list.append(url_split[0])
+        else:
+            if url not in clean_url_list:
+                clean_url_list.append(url)
     return clean_url_list
 
 def get_home_dir():
@@ -111,7 +111,7 @@ def wappalyzer(url):
     wappalyzer = subprocess.run([f'wappalyzer {url} -p'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
     return wappalyzer.stdout
 
-def npm_package_scan(self, args, url):
+def npm_package_scan_threaded(self, args, url):
     if "http" in url:
         print(f"[-] Scanning {url}...")
         get_links(url, url)
@@ -130,14 +130,40 @@ def npm_package_scan(self, args, url):
                 print(f"[+] Package {args.package} was found on {url}! (From Script Scan)")
                 send_slack_notification(args, url)
                 print(json.dumps(wappalyzer_json, indent=4))
+    else:
+        print("[!] Invalid URL!  Skipping...")
+
+def npm_package_scan(args, url_list):
+    for url in url_list:
+        if "http" in url:
+            now = datetime.now()
+            time = now.strftime("%H:%M:%S")
+            remaining = len(url_list) - url_list.index(url)
+            print(f"[-] Scanning {url} -- Time: {time} -- URLs Remaining: {remaining}")
+            get_links(url, url)
+            # Uncomment to add crawling
+            # link_number = crawl_links(url, "1")
+            wappalyzer_string = wappalyzer(url)
+            wappalyzer_json = json.loads(wappalyzer_string)
+            if args.package in wappalyzer_string:
+                print(f"[+] Package {args.package} was found on {url}! (From Wappalyzer)")
+                send_slack_notification(args, url)
+                print(json.dumps(wappalyzer_json, indent=4))
+            for link in links:
+                get_scripts(link)
+            for script in script_links:
+                if args.package.lower() in script.lower():
+                    print(f"[+] Package {args.package} was found on {url}! (From Script Scan)")
+                    send_slack_notification(args, url)
+                    print(json.dumps(wappalyzer_json, indent=4))
+        else:
+            print("[!] Invalid URL!  Skipping...")
 
 
 def get_fqdns(args):
-    res = requests.post(f'http://{args.server}:{args.port}/api/fqdn/all')
+    res = requests.post(f'http://{args.server}:{args.port}/api/auto', data={"fqdn":args.domain})
     fqdn_json = res.json()
-    fqdn_list = []
-    for fqdn in fqdn_json:
-        fqdn_list.append(fqdn['recon']['subdomains']['httprobe'])
+    fqdn_list = fqdn_json['recon']['subdomains']['httprobe']
     return fqdn_list
 
 
@@ -145,7 +171,8 @@ def arg_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('-S','--server', help='IP Address of MongoDB API', required=True)
     parser.add_argument('-P','--port', help='Port of MongoDB API', required=True)
-    parser.add_argument('-T','--threads', help='Number of Threads', required=True)
+    parser.add_argument('-d','--domain', help='FQDN of Root/Seed Being Targeted', required=True)
+    parser.add_argument('-T','--threads', help='Number of Threads', required=False)
     parser.add_argument('-j','--js', help='Scan For JavaScript Package', required=False, action='store_true')
     parser.add_argument('-p','--package', help='Name of JavaScript Package', required=False)
     return parser.parse_args()
@@ -159,25 +186,31 @@ def main(args):
         sys.exit(2)
     fqdn_list = get_fqdns(args)
     clean_url_list = clean_urls(fqdn_list)
-    while len(clean_url_list) > 0:
-        if len(clean_url_list) < int(args.threads):
-            x_ls = list(range(len(clean_url_list)))
-        else:
-            x_ls = list(range(int(args.threads)))
-        thread_list = []
-        for x in x_ls:
-            u = clean_url_list[0]
-            thisUrl = clean_url_list[0]
-            clean_url_list.remove(u)
-            thread = threading.Thread(target=npm_package_scan, args=(x, args, u))
-            thread_list.append(thread)
-        for thread in thread_list:
-            thread.start()
-        for thread in thread_list:
-            thread.join()
-        new_length = len(clean_url_list)
-        print(f"URLs remaining: {new_length}")
-    npm_package_scan(args, clean_url_list)
+    if args.threads:
+        print("[-] Running multi-threaded scan...")
+        while len(clean_url_list) > 0:
+            if len(clean_url_list) < int(args.threads):
+                x_ls = list(range(len(clean_url_list)))
+            else:
+                x_ls = list(range(int(args.threads)))
+            thread_list = []
+            for x in x_ls:
+                u = clean_url_list[0]
+                thisUrl = clean_url_list[0]
+                clean_url_list.remove(u)
+                thread = threading.Thread(target=npm_package_scan_threaded, args=(x, args, u))
+                thread_list.append(thread)
+            for thread in thread_list:
+                thread.start()
+            for thread in thread_list:
+                thread.join()
+            new_length = len(clean_url_list)
+            now = datetime.now()
+            time = now.strftime("%H:%M:%S")
+            print(f"URLs remaining: {new_length} -- Time: {time}")
+    else:
+        print("[-] Running single-thread scan...")
+        npm_package_scan(args, clean_url_list)
     print("[+] Done!")
 
 if __name__ == "__main__":
