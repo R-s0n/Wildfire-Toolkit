@@ -47,7 +47,7 @@ def scan(args):
         print(f"[-] Running Drifting-Embers Modules (Vuln Scanning) against {seed}")
         subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t templates'], shell=True)
         subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
-        subprocess.run([f'python3 toolkit/cve_embers.py -d {seed} -S {args.server} -P {args.port} --js -p react-draft-wysiwyg'], shell=True)
+        subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
     return True
 
 def arg_parse():
