@@ -24,6 +24,7 @@ def start(args):
         seed = fqdn['fqdn']
         print(f"[-] Running Fire-Starter Modules (Subdomain Recon) against {seed}")
         subprocess.run([f'python3 toolkit/fire_starter.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
+        subprocess.run([f'python3 toolkit/clear_sky.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
         subprocess.run([f'python3 toolkit/kindling.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
     return True
 
@@ -34,8 +35,8 @@ def spread(args):
     for fqdn in sorted_fqdns:
         seed = fqdn['fqdn']
         print(f"[-] Running Fire-Spreader Modules (Server/Port Recon) against {seed}")
-        subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
-        subprocess.run([f'python3 toolkit/wind.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
+        subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+        subprocess.run([f'python3 toolkit/wind.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
     return True
 
 def scan(args):
