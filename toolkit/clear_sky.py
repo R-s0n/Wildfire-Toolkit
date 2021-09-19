@@ -6,8 +6,8 @@ from datetime import datetime
 
 full_cmd_arguments = sys.argv
 argument_list = full_cmd_arguments[1:]
-short_options = "d:s:p:"
-long_options = ["domain=","server=","port="]
+short_options = "d:s:p:u"
+long_options = ["domain=","server=","port=", "update"]
 
 try:
     arguments, values = getopt.getopt(argument_list, short_options, long_options)
@@ -88,10 +88,11 @@ else:
     cloning = subprocess.run([f"mkdir ~/Reports"], stdout=subprocess.DEVNULL, shell=True)
     print("[+] Reports directory successfully created")
 print(f"[-] Running final NMap scan on identified targets...")
+subprocess.run([f"rm -rf {home_dir}/Reports/ClearSky_{fqdn}_*"], shell=True)
 if len(results_arr) < 10:
-    subprocess.run([f"sudo nmap -T 4 -iL /tmp/tls_filtered.tmp -Pn --script=http-title -p- --open > {home_dir}/Reports/ClearSky_{now}"], shell=True)
+    subprocess.run([f"sudo nmap -T 4 -iL /tmp/tls_filtered.tmp -Pn --script=http-title -p- --open > {home_dir}/Reports/ClearSky_{fqdn}_{now}"], shell=True)
 else:
-    subprocess.run([f"sudo nmap -T 4 -iL /tmp/tls_filtered.tmp -Pn --script=http-title --top-ports 100 --open > {home_dir}/Reports/ClearSky_{now}"], shell=True)
+    subprocess.run([f"sudo nmap -T 4 -iL /tmp/tls_filtered.tmp -Pn --script=http-title --top-ports 100 --open > {home_dir}/Reports/ClearSky_{fqdn}_{now}"], shell=True)
 print(f"[+] NMap scan completed successfully!  A report has been created in the ~/Reports directory")
 
 print(f"[-] Updating database...")
