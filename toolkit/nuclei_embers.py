@@ -75,6 +75,10 @@ try:
             continue
         json_result = json.loads(result)
         data.append(json_result)
+    res = requests.post(f"http://{server_ip}:{server_port}/api/auto", data={"fqdn":fqdn})
+    thisFqdn = res.json()
+    thisFqdn['vulns'] = data
+    requests.post(f'http://{server_ip}:{server_port}/api/auto/update', json=thisFqdn, headers={'Content-type':'application/json'})
     info_counter = 0
     non_info_counter = 0
     for result in data:
