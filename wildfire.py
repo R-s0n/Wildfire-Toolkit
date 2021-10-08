@@ -51,13 +51,26 @@ def scan(args):
         subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
     return True
 
+def enum(args):
+    res = get_fqdns(args)
+    fqdn_json = json.loads(res.text)
+    sorted_fqdns = sort_fqdns(fqdn_json)
+    for fqdn in sorted_fqdns:
+        seed = fqdn['fqdn']
+        print(f"[-] Running Enumeration Modules against {seed}")
+        subprocess.run([f'python3 toolkit/ignite.py -d {seed} -s {args.server} -p {args.port} -P {args.proxy} -t'], shell=True)
+        # subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+    return True
+
 def arg_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('-S','--server', help='IP Address of MongoDB API', required=True)
     parser.add_argument('-P','--port', help='Port of MongoDB API', required=True)
+    parser.add_argument('-p','--proxy', help='IP Address of Burp Suite Proxy', required=False)
     parser.add_argument('--start', help='Run Fire-Starter Modules', required=False, action='store_true')
     parser.add_argument('--spread', help='Run Fire-Spreader Modules (Expect a LONG scan time)', required=False, action='store_true')
     parser.add_argument('--scan', help='Run Vuln Scan Modules', required=False, action='store_true')
+    parser.add_argument('--enum', help='Run Enumeration Modules', required=False, action='store_true')
     return parser.parse_args()
 
 def main(args):
@@ -70,8 +83,12 @@ def main(args):
         spread(args)
     if args.scan is True:
         scan(args)
-    if args.start is False and args.spread is False and args.scan is False:
-        print("[!] Please Choose a Module!\n[!] Options:\n\n   --start   [Run Fire-Starter Modules]\n   --spread  [Run Fire-Spreader Modules] (Expect a LONG scan time)\n   --scan    [Run Vuln Scan Modules]\n")
+    if not args.proxy:
+        args.proxy = "127.0.0.1"
+    if args.enum is True:
+        enum(args)
+    if args.start is False and args.spread is False and args.scan is False and args.enum is False:
+        print("[!] Please Choose a Module!\n[!] Options:\n\n   --start   [Run Fire-Starter Modules]\n   --spread  [Run Fire-Spreader Modules] (Expect a LONG scan time)\n   --scan    [Run Vuln Scan Modules]\n   --enum    [Run Enumeration Modules]\n")
     print("[+] Done!")
 
 if __name__ == "__main__":
