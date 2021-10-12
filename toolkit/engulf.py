@@ -21,7 +21,7 @@ for current_argument, current_value in arguments:
         hasUrl = True
 
 if hasUrl == False:
-    print("[!] Please enter a URL using the -d or --domain flag...")
+    print("[!] Please enter a URL using the -u or --url flag...")
     sys.exit(2)
 
 start = time.time()
@@ -34,7 +34,7 @@ f = open(f"{home_dir}/Logs/automation.log", "a")
 f.write(f"Engulf.py - Start Time: {now_start}\n")
 f.close()
 
-r = requests.post('http://10.0.0.211:8000/api/url/auto', data={'url':url})
+r = requests.post('http://10.0.0.37:8000/api/url/auto', data={'url':url})
 thisUrl = r.json()
 
 try:
@@ -51,6 +51,8 @@ for endpoint in sorted_endpoints:
 print(f"[-] Starting parameter enumeration on {thisUrl['url']}")
 print(f"[-] {counter} parameters found with a 2XX response code")
 
+subprocess.run(["cd /home/rs0n/Wordlists/SecLists/Discovery/Web-Content; touch params.txt; cat burp-parameter-names.txt >> params.txt; cat raft-large-words.txt >> params.txt;"], shell=True)
+
 for endpoint in sorted_endpoints:
     if str(endpoint['statusCode'])[0] == '2':
         print(f"[-] Target Endpoint: {endpoint['endpoint']}\n[-] Status: {endpoint['statusCode']} -- Length: {endpoint['responseLength']}")
@@ -62,9 +64,9 @@ for endpoint in sorted_endpoints:
         except:
             print("[-] Targeting root directory...")
             thisEndpoint = "/"
-        target = url + thisEndpoint
+        target = url + "/" + thisEndpoint
         print(f"[-] Scanning {target} for hidden parameters...")
-        subprocess.run([f"arjun -u {target} -oJ /tmp/arjun-test.tmp -w /home/rs0n/Wordlists/SecLists/Discovery/Web-Content/params.txt -oB 10.0.0.208:8080 -q"], shell=True)
+        subprocess.run([f"arjun -u {target} -oJ /tmp/arjun-test.tmp -w /home/rs0n/Wordlists/SecLists/Discovery/Web-Content/params.txt -oB 10.0.0.96:8080 -q"], shell=True)
         with open('/tmp/arjun-test.tmp') as json_file:
             data = json.load(json_file)
         print(f"[+] Scan complete!")
@@ -75,14 +77,14 @@ for endpoint in sorted_endpoints:
             print(f'[+] Parameter found: {param}')
         print(f"[-] Updating database...")
         try:
-            r = requests.post('http://10.0.0.211:8000/api/url/auto', data={'url':url})
+            r = requests.post('http://10.0.0.37:8000/api/url/auto', data={'url':url})
             updateUrl = r.json()
             for endpoint in updateUrl['endpoints']:
                 if endpoint['endpoint'] == thisEndpoint:
                     endpointToUpdate = endpoint
                     endpointIndex = updateUrl['endpoints'].index(endpoint)
             updateUrl['endpoints'][endpointIndex]['arjun'] = {"method": data[target]['method'], "params": data[target]['params']}
-            requests.post('http://10.0.0.211:8000/api/url/auto/update', json=updateUrl)
+            requests.post('http://10.0.0.37:8000/api/url/auto/update', json=updateUrl)
         except Exception as e:
             print(f"[!] Database updated failed.  ")
             print(f"[!] {e}")
@@ -102,7 +104,7 @@ for endpoint in sorted_endpoints:
             thisEndpoint = "/"
         target = url + thisEndpoint
         print(f"[-] Scanning {target} for hidden parameters...")
-        subprocess.run([f"arjun -u {target} -oJ /tmp/arjun-test.tmp -w /home/rs0n/Wordlists/SecLists/Discovery/Web-Content/params.txt -oB 10.0.0.208:8080 -q -m POST"], shell=True)
+        subprocess.run([f"arjun -u {target} -oJ /tmp/arjun-test.tmp -w /home/rs0n/Wordlists/SecLists/Discovery/Web-Content/params.txt -oB 10.0.0.96:8080 -q -m POST"], shell=True)
         with open('/tmp/arjun-test.tmp') as json_file:
             data = json.load(json_file)
         print(f"[+] Scan complete!")
@@ -113,14 +115,14 @@ for endpoint in sorted_endpoints:
             print(f'[+] Parameter found: {param}')
         print(f"[-] Updating database...")
         try:
-            r = requests.post('http://10.0.0.211:8000/api/url/auto', data={'url':url})
+            r = requests.post('http://10.0.0.37:8000/api/url/auto', data={'url':url})
             updateUrl = r.json()
             for endpoint in updateUrl['endpoints']:
                 if endpoint['endpoint'] == thisEndpoint:
                     endpointToUpdate = endpoint
                     endpointIndex = updateUrl['endpoints'].index(endpoint)
             updateUrl['endpoints'][endpointIndex]['arjunPost'] = {"method": data[target]['method'], "params": data[target]['params']}
-            requests.post('http://10.0.0.211:8000/api/url/auto/update', json=updateUrl)
+            requests.post('http://10.0.0.37:8000/api/url/auto/update', json=updateUrl)
         except Exception as e:
             print(f"[!] Database updated failed.  ")
             print(f"[!] {e}")
@@ -140,7 +142,7 @@ for endpoint in sorted_endpoints:
             thisEndpoint = "/"
         target = url + thisEndpoint
         print(f"[-] Scanning {target} for hidden parameters...")
-        subprocess.run([f"arjun -u {target} -oJ /tmp/arjun-test.tmp -w /home/rs0n/Wordlists/SecLists/Discovery/Web-Content/params.txt -oB 10.0.0.208:8080 -q -m JSON"], shell=True)
+        subprocess.run([f"arjun -u {target} -oJ /tmp/arjun-test.tmp -w /home/rs0n/Wordlists/SecLists/Discovery/Web-Content/params.txt -oB 10.0.0.96:8080 -q -m JSON"], shell=True)
         with open('/tmp/arjun-test.tmp') as json_file:
             data = json.load(json_file)
         print(f"[+] Scan complete!")
@@ -151,14 +153,14 @@ for endpoint in sorted_endpoints:
             print(f'[+] Parameter found: {param}')
         print(f"[-] Updating database...")
         try:
-            r = requests.post('http://10.0.0.211:8000/api/url/auto', data={'url':url})
+            r = requests.post('http://10.0.0.37:8000/api/url/auto', data={'url':url})
             updateUrl = r.json()
             for endpoint in updateUrl['endpoints']:
                 if endpoint['endpoint'] == thisEndpoint:
                     endpointToUpdate = endpoint
                     endpointIndex = updateUrl['endpoints'].index(endpoint)
             updateUrl['endpoints'][endpointIndex]['arjunJson'] = {"method": data[target]['method'], "params": data[target]['params']}
-            requests.post('http://10.0.0.211:8000/api/url/auto/update', json=updateUrl)
+            requests.post('http://10.0.0.37:8000/api/url/auto/update', json=updateUrl)
         except Exception as e:
             print(f"[!] Database updated failed.  ")
             print(f"[!] {e}")
