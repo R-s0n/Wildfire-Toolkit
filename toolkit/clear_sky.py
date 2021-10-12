@@ -90,9 +90,9 @@ else:
 print(f"[-] Running final NMap scan on identified targets...")
 subprocess.run([f"rm -rf {home_dir}/Reports/ClearSky_{fqdn}_*"], shell=True)
 if len(results_arr) < 10:
-    subprocess.run([f"sudo nmap -T 4 -iL /tmp/tls_filtered.tmp -Pn --script=http-title -p- --open > {home_dir}/Reports/ClearSky_{fqdn}_{now}"], shell=True)
+    subprocess.run([f"nmap -T 4 -iL /tmp/tls_filtered.tmp -Pn --script=http-title -p- --open > {home_dir}/Reports/ClearSky_{fqdn}_{now}"], shell=True)
 else:
-    subprocess.run([f"sudo nmap -T 4 -iL /tmp/tls_filtered.tmp -Pn --script=http-title --top-ports 100 --open > {home_dir}/Reports/ClearSky_{fqdn}_{now}"], shell=True)
+    subprocess.run([f"nmap -T 4 -iL /tmp/tls_filtered.tmp -Pn --script=http-title --top-ports 100 --open > {home_dir}/Reports/ClearSky_{fqdn}_{now}"], shell=True)
 print(f"[+] NMap scan completed successfully!  A report has been created in the ~/Reports directory")
 
 print(f"[-] Updating database...")
