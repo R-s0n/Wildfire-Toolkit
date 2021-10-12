@@ -117,6 +117,7 @@ def npm_package_scan(args, url_list):
     for cve in cve_json:
         if cve['javascript'] is True:
             packages.append(cve['searchTerm'])
+            blacklist = cve['blacklistTerms']
     for url in url_list:
         script_links = []
         raw_scripts = []
@@ -134,19 +135,23 @@ def npm_package_scan(args, url_list):
             wappalyzer_json = json.loads(wappalyzer_string)
             for package in packages:
                 if package.lower() in wappalyzer_string:
-                    print(f"[+] Package {package} was found on {url}! (From Wappalyzer)")
-                    send_slack_notification(args, url, package)
-                    print(json.dumps(wappalyzer_json, indent=4))
-                    continue
+                    for term in blacklist:
+                        if term not in wappalyzer_string:
+                            print(f"[+] Package {package} was found on {url}! (From Wappalyzer)")
+                            send_slack_notification(args, url, package)
+                            print(json.dumps(wappalyzer_json, indent=4))
+                            continue
             links.append(url)
             for link in links:
                 script_links = get_scripts(link, script_links)
             for script in script_links:
                 for package in packages:
                     if package.lower() in script.lower():
-                        print(f"[+] Package {package} was found on {url}! (From Script Scan)")
-                        send_slack_notification(args, url, package)
-                        print(json.dumps(wappalyzer_json, indent=4))
+                        for term in blacklist:
+                            if term not in wappalyzer_string:
+                                print(f"[+] Package {package} was found on {url}! (From Script Scan)")
+                                send_slack_notification(args, url, package)
+                                print(json.dumps(wappalyzer_json, indent=4))
         else:
             print("[!] Invalid URL!  Skipping...")
 
