@@ -21,11 +21,14 @@ def start(args):
     fqdn_json = json.loads(res.text)
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
-        seed = fqdn['fqdn']
-        print(f"[-] Running Fire-Starter Modules (Subdomain Recon) against {seed}")
-        subprocess.run([f'python3 toolkit/fire_starter.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
-        subprocess.run([f'python3 toolkit/clear_sky.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
-        subprocess.run([f'python3 toolkit/kindling.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
+        if fqdn['fqdn'] != args.blacklist:
+            seed = fqdn['fqdn']
+            print(f"[-] Running Fire-Starter Modules (Subdomain Recon) against {seed}")
+            subprocess.run([f'python3 toolkit/fire_starter.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
+            subprocess.run([f'python3 toolkit/clear_sky.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+            subprocess.run([f'python3 toolkit/kindling.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
+        else:
+            print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
 
 def spread(args):
@@ -33,10 +36,13 @@ def spread(args):
     fqdn_json = json.loads(res.text)
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
-        seed = fqdn['fqdn']
-        print(f"[-] Running Fire-Spreader Modules (Server/Port Recon) against {seed}")
-        subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
-        subprocess.run([f'python3 toolkit/wind.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+        if fqdn['fqdn'] != args.blacklist:
+            seed = fqdn['fqdn']
+            print(f"[-] Running Fire-Spreader Modules (Server/Port Recon) against {seed}")
+            subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+            subprocess.run([f'python3 toolkit/wind.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+        else:
+            print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
 
 def scan(args):
@@ -44,11 +50,14 @@ def scan(args):
     fqdn_json = json.loads(res.text)
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
-        seed = fqdn['fqdn']
-        print(f"[-] Running Drifting-Embers Modules (Vuln Scanning) against {seed}")
-        subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t templates'], shell=True)
-        subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
-        subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
+        if fqdn['fqdn'] != args.blacklist:
+            seed = fqdn['fqdn']
+            print(f"[-] Running Drifting-Embers Modules (Vuln Scanning) against {seed}")
+            subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t templates'], shell=True)
+            subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+            subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
+        else:
+            print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
 
 def enum(args):
@@ -56,10 +65,13 @@ def enum(args):
     fqdn_json = json.loads(res.text)
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
-        seed = fqdn['fqdn']
-        print(f"[-] Running Enumeration Modules against {seed}")
-        subprocess.run([f'python3 toolkit/ignite.py -d {seed} -s {args.server} -p {args.port} -P {args.proxy} -t'], shell=True)
-        # subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+        if fqdn['fqdn'] != args.blacklist:
+            seed = fqdn['fqdn']
+            print(f"[-] Running Enumeration Modules against {seed}")
+            subprocess.run([f'python3 toolkit/ignite.py -d {seed} -s {args.server} -p {args.port} -P {args.proxy} -t'], shell=True)
+            # subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+        else:
+            print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
 
 def arg_parse():
@@ -67,6 +79,7 @@ def arg_parse():
     parser.add_argument('-S','--server', help='IP Address of MongoDB API', required=True)
     parser.add_argument('-P','--port', help='Port of MongoDB API', required=True)
     parser.add_argument('-p','--proxy', help='IP Address of Burp Suite Proxy', required=False)
+    parser.add_argument('-b','--blacklist', help='FQDN to Blacklist (skip) for this round of testing', required=False)
     parser.add_argument('--start', help='Run Fire-Starter Modules', required=False, action='store_true')
     parser.add_argument('--spread', help='Run Fire-Spreader Modules (Expect a LONG scan time)', required=False, action='store_true')
     parser.add_argument('--scan', help='Run Vuln Scan Modules', required=False, action='store_true')
