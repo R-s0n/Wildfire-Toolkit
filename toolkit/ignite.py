@@ -27,6 +27,9 @@ def wordlist_scan(args, target_url_string, blacklist=[], filter_regex="404 Not F
         if '?' in result_data['endpoint']:
             temp = result_data['endpoint'].split('?')
             result_data['endpoint'] = temp[0]
+        if '#' in result_data['endpoint']:
+            temp = result_data['endpoint'].split('#')
+            result_data['endpoint'] = temp[0]
         result_str = result_data['endpoint']
         current_endpoints_list = []
         current_endpoints = thisUrl['endpoints']
@@ -73,6 +76,9 @@ def wordlist_scan_files(args, target_url_string, blacklist=[], filter_regex="404
                 current_endpoints_list.append(endpoint['endpoint'])
             if '?' in result_data['endpoint']:
                 temp = result_data['endpoint'].split('?')
+                result_data['endpoint'] = temp[0]
+            if '#' in result_data['endpoint']:
+                temp = result_data['endpoint'].split('#')
                 result_data['endpoint'] = temp[0]
             if result_str not in current_endpoints_list or ".png" not in result_str or ".PNG" not in result_str or ".jpg" not in result_str or ".JPG" not in result_str:
                 thisUrl['endpoints'].append(result_data)
@@ -185,6 +191,9 @@ def crawl_scan(args, target_url_string, blacklist=[], filter_regex="404 Not Foun
             if '?' in result_data['endpoint']:
                 temp = result_data['endpoint'].split('?')
                 result_data['endpoint'] = temp[0]
+            if '#' in result_data['endpoint']:
+                temp = result_data['endpoint'].split('#')
+                result_data['endpoint'] = temp[0]
             result_str = result_data['endpoint']
             current_endpoints_list = []
             current_endpoints = thisUrl['endpoints']
@@ -193,32 +202,6 @@ def crawl_scan(args, target_url_string, blacklist=[], filter_regex="404 Not Foun
             if result_str not in current_endpoints_list and ".png" not in result_str and ".PNG" not in result_str and ".jpg" not in result_str and ".JPG" not in result_str:
                 thisUrl['endpoints'].append(result_data)
         update_url(args, thisUrl)
-
-
-def cewl_scan(args, target_url_string, blacklist=[], filter_regex="404 Not Found"):
-    home_dir = get_home_dir()
-    thisUrl = get_target_url_object(args, target_url_string)
-    print("[-] Generating custom wordlist...")
-    subprocess.run([f'cewl -d 2 -m 5 -o -a -w {home_dir}/Wordlists/{args.domain}_custom.txt {target_url_string}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
-    print("[-] Enumerating endpoints using custom wordlist...")
-    subprocess.run([f"{home_dir}/go/bin/ffuf -w '{home_dir}/Wordlists/{args.domain}_custom.txt' -u {target_url_string}/FUZZ -H 'Te: trailers' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0' -recursion -recursion-depth 4 -r -p 0.1-3.0 -sa -t 50 -fr '{filter_regex}' -fc 403,401 -replay-proxy http://{args.proxy}:8080 -o ../temp/ffuf-results.tmp -of json"], shell=True)
-    with open('../temp/ffuf-results.tmp') as json_file:
-        data = json.load(json_file)
-    for result in data['results']:
-        result_data = {"endpoint":result['input']['FUZZ'], "statusCode":result['status'], "responseLength":result['length']}
-        if len(result_data['endpoint']) < 1:
-            result_data['endpoint'] = "/"
-        if result_data['endpoint'][0] != "/":
-            result_data['endpoint'] = f"/{result_data['endpoint']}"
-        result_str = result_data['endpoint']
-        current_endpoints_list = []
-        current_endpoints = thisUrl['endpoints']
-        for endpoint in current_endpoints:
-            current_endpoints_list.append(endpoint['endpoint'])
-        if '?' not in result_data['endpoint'] and result_str not in current_endpoints_list:
-            thisUrl['endpoints'].append(result_data)
-    thisUrl['completedWordlists'].append("cewl")
-    update_url(args, thisUrl)
 
 def remove_duplicates(args, target_url_string):
     thisUrl = get_target_url_object(args, target_url_string)
@@ -306,6 +289,9 @@ def check_xml_sitemap(args, target_url_string, filter_regex, sitemap_endpoint="/
                         current_endpoints_list.append(endpoint['endpoint'])
                     if '?' in result_data['endpoint']:
                         temp = result_data['endpoint'].split('?')
+                        result_data['endpoint'] = temp[0]
+                    if '#' in result_data['endpoint']:
+                        temp = result_data['endpoint'].split('#')
                         result_data['endpoint'] = temp[0]
                     if result_str not in current_endpoints_list:
                         thisUrl['endpoints'].append(result_data)
@@ -422,7 +408,9 @@ def arg_parse():
     return parser.parse_args()
 
 def main(args):
-    # compensate for
+    # ToDo:
+    # 1. Fix hash fragment issue
+    # 1. compensate for
     # javascript:go('client1.php')
     # javascript:go('client2.php')
     # javascript:go('client3.php')
