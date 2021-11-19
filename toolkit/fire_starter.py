@@ -351,36 +351,36 @@ except Exception as e:
     print(f'[!] Exception: {e}')
     print("[!] Gospider module did NOT complete successfully -- skipping...")
 
-### Hakrawler
-
-try:
-    hakrawler = subprocess.run([f"ls {home_dir}/go/bin/hakrawler"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
-    if hakrawler.returncode == 0:
-        print("[+] Hakrawler is already installed")
-    else :
-        print("[!] Hakrawler is NOT already installed -- Installing now...")
-        cloning = subprocess.run(["go get github.com/hakluke/hakrawler"], stdout=subprocess.DEVNULL, shell=True)
-        print("[+] Hakrawler successfully installed!")
-    print(f"[-] Running Hakrawler against {fqdn}...")
-    # Add after debug: stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, 
-    subprocess.run([f'cd {home_dir}/go/bin; cat /tmp/amass.tmp | ./hakrawler -subs -d 3 -u > /tmp/hakrawler.tmp'], shell=True)
-    f = open(f"/tmp/hakrawler.tmp", "r")
-    hakrawler_arr = f.read().rstrip().split("\n")
-    hakrawler_link_arr = []
-    for line in hakrawler_arr:
-        new_arr = line.split(" ")
-        if len(new_arr) > 1:
-            temp_arr = new_arr[1].split("/")
-            if len(temp_arr) > 2:
-                if temp_arr[2] not in hakrawler_link_arr:
-                    hakrawler_link_arr.append(temp_arr[2])
-    f.close()
-    subprocess.run(["rm -rf /tmp/hakrawler"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
-    print("[+] Hakwraler completed successfully!")
-    thisFqdn['recon']['subdomains']['hakrawler'] = hakrawler_link_arr
-except Exception as e:
-    print(f'[!] Exception: {e}')
-    print("[!] Hakrawler module did NOT complete successfully -- skipping...")
+# ### Hakrawler
+# 
+# try:
+#     hakrawler = subprocess.run([f"ls {home_dir}/go/bin/hakrawler"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+#     if hakrawler.returncode == 0:
+#         print("[+] Hakrawler is already installed")
+#     else :
+#         print("[!] Hakrawler is NOT already installed -- Installing now...")
+#         cloning = subprocess.run(["go get github.com/hakluke/hakrawler"], stdout=subprocess.DEVNULL, shell=True)
+#         print("[+] Hakrawler successfully installed!")
+#     print(f"[-] Running Hakrawler against {fqdn}...")
+#     # Add after debug: stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, 
+#     subprocess.run([f'cd {home_dir}/go/bin; cat /tmp/amass.tmp | ./hakrawler -subs -d 3 -u > /tmp/hakrawler.tmp'], shell=True)
+#     f = open(f"/tmp/hakrawler.tmp", "r")
+#     hakrawler_arr = f.read().rstrip().split("\n")
+#     hakrawler_link_arr = []
+#     for line in hakrawler_arr:
+#         new_arr = line.split(" ")
+#         if len(new_arr) > 1:
+#             temp_arr = new_arr[1].split("/")
+#             if len(temp_arr) > 2:
+#                 if temp_arr[2] not in hakrawler_link_arr:
+#                     hakrawler_link_arr.append(temp_arr[2])
+#     f.close()
+#     subprocess.run(["rm -rf /tmp/hakrawler"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+#     print("[+] Hakwraler completed successfully!")
+#     thisFqdn['recon']['subdomains']['hakrawler'] = hakrawler_link_arr
+# except Exception as e:
+#     print(f'[!] Exception: {e}')
+#     print("[!] Hakrawler module did NOT complete successfully -- skipping...")
 
 ### SubDomainizer
 
