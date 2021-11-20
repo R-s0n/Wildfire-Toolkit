@@ -1,3 +1,4 @@
+from os import remove
 import requests, sys, subprocess, getopt, json, time, math
 from datetime import datetime
 
@@ -5,6 +6,18 @@ full_cmd_arguments = sys.argv
 argument_list = full_cmd_arguments[1:]
 short_options = "d:s:p:t:"
 long_options = ["domain=","server=","port=","template="]
+
+get_home_dir = subprocess.run(["echo $HOME"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
+home_dir = get_home_dir.stdout.replace("\n", "")
+
+# whitelist = 'takeovers/','default-logins/','miscellaneous/','technologies/','vulnerabilities/'
+
+blacklist = ['token-spray/','iot/',
+            'misconfiguration/http-missing-security-headers.yaml',
+            'helpers/','fuzzing/',]
+
+for template in blacklist:
+    subprocess.run([f"rm -rf {home_dir}/nuclei-templates/{template}"], shell=True)
 
 try:
     arguments, values = getopt.getopt(argument_list, short_options, long_options)
@@ -38,9 +51,6 @@ get_home_dir = subprocess.run(["echo $HOME"], stdout=subprocess.PIPE, stderr=sub
 home_dir = get_home_dir.stdout.replace("\n", "")
 
 now_start = datetime.now().strftime("%d-%m-%y_%I%p")
-f = open(f"{home_dir}/Logs/automation.log", "a")
-f.write(f"Nuclei - Template: {template} - Start Time: {now_start}\n")
-f.close()
 
 start = time.time()
 
@@ -62,10 +72,10 @@ f.close()
 
 now = datetime.now().strftime("%d-%m-%y_%I%p")
 
-subprocess.run([f"{home_dir}/go/bin/nuclei -t {template}/ -l /tmp/urls.txt -o {home_dir}/Reports/{template}-{fqdn}-{now}.json -json"], shell=True)
+subprocess.run([f"{home_dir}/go/bin/nuclei -t {template} -l /tmp/urls.txt -o {home_dir}/Reports/{fqdn}-{now}.json -json"], shell=True)
 
 try:
-    f = open(f"{home_dir}/Reports/{template}-{fqdn}-{now}.json")
+    f = open(f"{home_dir}/Reports/{fqdn}-{now}.json")
     results = f.read().split("\n")
     data = []
     for result in results:

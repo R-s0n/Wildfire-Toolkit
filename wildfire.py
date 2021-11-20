@@ -53,9 +53,9 @@ def scan(args):
         if fqdn['fqdn'] != args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Drifting-Embers Modules (Vuln Scanning) against {seed}")
-            subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t templates'], shell=True)
-            subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
-            subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
+            subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t ~/nuclei-templates'], shell=True)
+            # subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+            # subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
@@ -69,7 +69,7 @@ def enum(args):
             seed = fqdn['fqdn']
             print(f"[-] Running Enumeration Modules against {seed}")
             subprocess.run([f'python3 toolkit/ignite.py -d {seed} -s {args.server} -p {args.port} -P {args.proxy} -t'], shell=True)
-            # subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+            # subprocess.run([f'python3 toolkit/engulf.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True

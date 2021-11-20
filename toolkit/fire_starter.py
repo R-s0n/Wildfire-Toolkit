@@ -179,7 +179,7 @@ try:
         print("[+] Assetfinder is already installed")
     else :
         print("[!] Assetfinder is NOT already installed -- Installing now...")
-        cloning = subprocess.run(["go get -u github.com/tomnomnom/assetfinder"], stdout=subprocess.DEVNULL, shell=True)
+        cloning = subprocess.run(["go install -v github.com/tomnomnom/assetfinder@latest"], stdout=subprocess.DEVNULL, shell=True)
         print("[+] Assetfinder successfully installed!")
     print(f"[-] Running Assetfinder against {fqdn}...")
     assetfinder_results = subprocess.run([f"{home_dir}/go/bin/assetfinder --subs-only {fqdn} > /tmp/assetfinder.tmp"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
@@ -201,7 +201,7 @@ try:
         print("[+] Gau is already installed")
     else :
         print("[!] Gau is NOT already installed -- Installing now...")
-        cloning = subprocess.run(["GO111MODULE=on go get -u -v github.com/lc/gau"], stdout=subprocess.DEVNULL, shell=True)
+        cloning = subprocess.run(["GO111MODULE=on go install -v github.com/lc/gau@latest"], stdout=subprocess.DEVNULL, shell=True)
         print("[+] Gau successfully installed!")
     print(f"[-] Running Gau against {fqdn}...")
     gau_results = subprocess.run([f"{home_dir}/go/bin/gau -subs {fqdn} | cut -d / -f 3 | sort -u > /tmp/gau.tmp"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
@@ -270,7 +270,7 @@ try:
         print("[+] Subfinder is already installed")
     else :
         print("[!] Subfinder is NOT already installed -- Installing now...")
-        cloning = subprocess.run(["GO111MODULE=on go get -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder"], stdout=subprocess.DEVNULL, shell=True)
+        cloning = subprocess.run(["GO111MODULE=on go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest"], stdout=subprocess.DEVNULL, shell=True)
         print("[+] Subfinder successfully installed!")
         print(f"[+] NOTE: Adding API Keys to {home_dir}/.config/subfinder/config.yaml will dramatically increase subfinder's ability to discover subdomains")
     print(f"[-] Running Subfinder against {fqdn}...")
@@ -328,7 +328,7 @@ try:
         print("[+] Gospider is already installed")
     else :
         print("[!] Gospider is NOT already installed -- Installing now...")
-        cloning = subprocess.run(["go get -u github.com/jaeles-project/gospider"], stdout=subprocess.DEVNULL, shell=True)
+        cloning = subprocess.run(["go install -v github.com/jaeles-project/gospider@latest"], stdout=subprocess.DEVNULL, shell=True)
         print("[+] Gospider successfully installed!")
     print(f"[-] Running Gospider against {fqdn}...")
     gospider_results = subprocess.run([f'cd {home_dir}/go/bin;  ./gospider -s "https://{fqdn}" -o /tmp/gospider -c 10 -d 1 --other-source --include-subs'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
@@ -359,11 +359,11 @@ except Exception as e:
 #         print("[+] Hakrawler is already installed")
 #     else :
 #         print("[!] Hakrawler is NOT already installed -- Installing now...")
-#         cloning = subprocess.run(["go get github.com/hakluke/hakrawler"], stdout=subprocess.DEVNULL, shell=True)
+#         cloning = subprocess.run(["go install github.com/hakluke/hakrawler@latest"], stdout=subprocess.DEVNULL, shell=True)
 #         print("[+] Hakrawler successfully installed!")
 #     print(f"[-] Running Hakrawler against {fqdn}...")
 #     # Add after debug: stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, 
-#     subprocess.run([f'cd {home_dir}/go/bin; cat /tmp/amass.tmp | ./hakrawler -subs -d 3 -u > /tmp/hakrawler.tmp'], shell=True)
+#     subprocess.run([f'cd {home_dir}/go/bin; cat /tmp/amass.tmp | ./hakrawler -subs -d 3 -v > /tmp/hakrawler.tmp'], shell=True)
 #     f = open(f"/tmp/hakrawler.tmp", "r")
 #     hakrawler_arr = f.read().rstrip().split("\n")
 #     hakrawler_link_arr = []
@@ -395,7 +395,7 @@ try:
         install = subprocess.run([f"sudo pip3 install -r {home_dir}/Tools/SubDomainizer/requirements.txt"], stdout=subprocess.DEVNULL, shell=True)
         print("[+] SubDomainizer successfully installed!")
     print(f"[-] Running SubDomainizer against {fqdn}...")
-    subdomainizer_results = subprocess.run([f"python3 {home_dir}/Tools/SubDomainizer/SubDomainizer.py -l /tmp/amass.tmp -o /tmp/subdomainizer.tmp"], stdout=subprocess.PIPE, text=True, shell=True)
+    subdomainizer_results = subprocess.run([f"python3 {home_dir}/Tools/SubDomainizer/SubDomainizer.py -l /tmp/amass.tmp -o /tmp/subdomainizer.tmp"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
     f = open("/tmp/subdomainizer.tmp", "r")
     subdomainizer_arr = f.read().rstrip().split("\n")
     f.close()
@@ -403,8 +403,8 @@ try:
     print("[+] SubDomainizer completed successfully!")
     thisFqdn['recon']['subdomains']['subdomainizer'] = subdomainizer_arr
 except Exception as e:
-    print(f'[!] Exception: {e}')
-    print("[!] SubDomainizer module did NOT complete successfully -- skipping...")
+    # print(f'[!] Exception: {e}')
+    print("[!] SubDomainizer did not return any results...")
 
 print("[+] Link / JS Discovery Modules Completed!")
 print("[-] Starting Subdomain Bruteforcing Modules...")
@@ -442,7 +442,7 @@ try:
         print("[+] ShuffleDNS is already installed")
     else :
         print("[!] ShuffleDNS is NOT already installed -- Installing now...")
-        cloning = subprocess.run(["sudo apt-get install -y massdns; GO111MODULE=on go get -v github.com/projectdiscovery/shuffledns/cmd/shuffledns"], stdout=subprocess.DEVNULL, shell=True)
+        cloning = subprocess.run(["sudo apt-get install -y massdns; GO111MODULE=on go install -v github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest"], stdout=subprocess.DEVNULL, shell=True)
         print("[+] ShuffleDNS successfully installed!")
     print(f"[-] Running ShuffleDNS against {fqdn} using massive wordlist...")
     shuffledns_results = subprocess.run([f'{home_dir}/go/bin/shuffledns -d {fqdn} -w {home_dir}/Wordlists/all.txt -r {home_dir}/Wordlists/resolvers.txt -o /tmp/shuffledns.tmp'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)

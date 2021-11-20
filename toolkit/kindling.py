@@ -63,7 +63,7 @@ try:
         print("[+] Httprobe is already installed")
     else :
         print("[!] Httprobe is NOT already installed -- Installing now...")
-        cloning = subprocess.run(["go get -u github.com/tomnomnom/httprobe"], stdout=subprocess.DEVNULL, shell=True)
+        cloning = subprocess.run(["go install -v github.com/tomnomnom/httprobe@latest"], stdout=subprocess.DEVNULL, shell=True)
         print("[+] Httprobe successfully installed!")
     print(f"[-] Running Httprobe against {fqdn}...")
     subdomainStr = ""
@@ -123,13 +123,17 @@ else:
 # subprocess.run([f"cd {home_dir}/Tools/EyeWitness/Python; ./EyeWitness.py -f /tmp/httprobe_results.tmp -d {home_dir}/Reports/EyeWitness_kindling_{fqdn}_{now} --no-prompt --jitter 5 --timeout 10"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
 # print(f"[+] EyeWitness report complete!")
 print(f"[-] Sending notification through Slack...")
-message_urls_string = ""
-for url in thisFqdn['recon']['subdomains']['httprobeAdded']:
-    message_urls_string += f"{url}\n"
 end = time.time()
 runtime_seconds = math.floor(end - start)
 runtime_minutes = math.floor(runtime_seconds / 60)
-message_json = {'text':f'kindling.py (live server probe) completed successfully in {runtime_minutes} minutes!  This scan of {fqdn} discovered the following URLs went live in the last 6 hours:\n\n{message_urls_string}\nHappy Hunting :)','username':'Recon Box','icon_emoji':':eyes:'}
+message_urls_string = ""
+length = len(thisFqdn['recon']['subdomains']['httprobeAdded'])
+if length > 10:
+    message_json = {'text':f'kindling.py (live server probe) completed successfully in {runtime_minutes} minutes!  This scan of {fqdn} discovered that {length} URLs went live in the last 6 hours!\nHappy Hunting :)','username':'Recon Box','icon_emoji':':eyes:'}
+else:
+    for url in thisFqdn['recon']['subdomains']['httprobeAdded']:
+        message_urls_string += f"{url}\n"
+    message_json = {'text':f'kindling.py (live server probe) completed successfully in {runtime_minutes} minutes!  This scan of {fqdn} discovered the following URLs went live in the last 6 hours:\n\n{message_urls_string}\nHappy Hunting :)','username':'Recon Box','icon_emoji':':eyes:'}
 f = open(f'{home_dir}/.keys/slack_web_hook')
 token = f.read()
 slack_auto = requests.post(f'https://hooks.slack.com/services/{token}', json=message_json)
