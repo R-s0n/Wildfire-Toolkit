@@ -101,7 +101,7 @@ if go_check.returncode == 0:
     print("[+] Go is installed")
 else :
     print("[!] Go is NOT installed -- Installing now...")
-    cloning = subprocess.run(["sudo apt-get install -y golang-go; apt-get install -y gccgo-go; mkdir {home_dir}/go;"], stdout=subprocess.DEVNULL, shell=True)
+    cloning = subprocess.run([f"sudo apt-get install -y golang-go; apt-get install -y gccgo-go; mkdir {home_dir}/go;"], stdout=subprocess.DEVNULL, shell=True)
     print("[+] Go was successfully installed")
 
 print("[-] Starting Subdomain Scraping Modules...")

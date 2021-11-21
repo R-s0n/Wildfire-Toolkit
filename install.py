@@ -4,6 +4,23 @@ import subprocess, argparse
 from wildfire import Timer
 from time import sleep
 
+def install_go(args):
+    # To Update: https://golang.org/doc/install
+    home_dir = get_home_dir()
+    subprocess.run(["wget https://golang.org/dl/go1.17.3.linux-amd64.tar.gz"], shell=True)
+    subprocess.run(["sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.17.3.linux-amd64.tar.gz"], shell=True)
+    subprocess.run(["sudo rm go1.17.3.linux-amd64.tar.gz"], shell=True)
+    subprocess.run([f"echo export PATH=$PATH:/usr/local/go/bin >> {home_dir}/.zshrc && source {home_dir}/.zshrc"])
+    install_check = subprocess.run(["go version"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] Go installed successfully!")
+    else:
+        print("[!] Something went wrong!  Go was NOT installed successfully...")
+
+def get_home_dir():
+    get_home_dir = subprocess.run(["echo $HOME"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
+    return get_home_dir.stdout.replace("\n", "")
+
 def arg_parse():
     parser = argparse.ArgumentParser()
     # parser.add_argument('-S','--server', help='IP Address of MongoDB API', required=True)
