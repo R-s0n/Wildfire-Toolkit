@@ -2,6 +2,8 @@ from os import remove
 import requests, sys, subprocess, getopt, json, time, math
 from datetime import datetime
 
+start = datetime.now()
+
 full_cmd_arguments = sys.argv
 argument_list = full_cmd_arguments[1:]
 short_options = "d:s:p:t:"
@@ -10,9 +12,7 @@ long_options = ["domain=","server=","port=","template="]
 get_home_dir = subprocess.run(["echo $HOME"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
 home_dir = get_home_dir.stdout.replace("\n", "")
 
-# whitelist = 'takeovers/','default-logins/','miscellaneous/','technologies/','vulnerabilities/'
-
-blacklist = ['token-spray/','iot/',
+blacklist = ['token-spray/','iot/',"/technologies/fingerprinthub-web-fingerprints.yaml",
             'misconfiguration/http-missing-security-headers.yaml',
             'helpers/','fuzzing/',]
 
@@ -94,8 +94,10 @@ try:
     for result in data:
         if result['info']['severity'] == 'info':
             info_counter += 1
+            result['impactful'] = False
         else :
             non_info_counter += 1
+            result['impactful'] = True
     end = time.time()
     runtime_seconds = math.floor(end - start)
     runtime_minutes = math.floor(runtime_seconds / 60)
@@ -114,3 +116,4 @@ now_end = datetime.now().strftime("%d-%m-%y_%I%p")
 f = open(f"{home_dir}/Logs/automation.log", "a")
 f.write(f"Nuclei - Template: {template} - End Time: {now_end}\n")
 f.close()
+

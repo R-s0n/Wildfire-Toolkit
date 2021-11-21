@@ -1,5 +1,21 @@
+#!/usr/bin/python3
 
 import requests, argparse, subprocess, sys, json
+from datetime import datetime
+
+class Timer:
+    def __init__(self):
+        self.start = datetime.now()
+        self.stop = None
+    
+    def stop_timer(self):
+        self.stop = datetime.now()
+
+    def get_start(self):
+        return self.start.strftime("%H:%M:%S")
+
+    def get_stop(self):
+        return self.stop.strftime("%H:%M:%S")
 
 def get_fqdns(args):
     res = requests.post(f"http://{args.server}:{args.port}/api/fqdn/all")
@@ -87,6 +103,7 @@ def arg_parse():
     return parser.parse_args()
 
 def main(args):
+    wildfire_timer = Timer()
     if args.start is True and args.spread is True:
         start(args)
         spread(args)
@@ -102,7 +119,8 @@ def main(args):
         enum(args)
     if args.start is False and args.spread is False and args.scan is False and args.enum is False:
         print("[!] Please Choose a Module!\n[!] Options:\n\n   --start   [Run Fire-Starter Modules]\n   --spread  [Run Fire-Spreader Modules] (Expect a LONG scan time)\n   --scan    [Run Vuln Scan Modules]\n   --enum    [Run Enumeration Modules]\n")
-    print("[+] Done!")
+    wildfire_timer.stop_timer()
+    print(f"[+] Done!  Start: {wildfire_timer.get_start()}  |  Stop: {wildfire_timer.get_stop()}")
 
 if __name__ == "__main__":
     args = arg_parse()
