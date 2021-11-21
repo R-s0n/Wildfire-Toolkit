@@ -9,7 +9,7 @@ def install_go():
     subprocess.run(["sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.17.3.linux-amd64.tar.gz"], shell=True)
     subprocess.run(["sudo rm go1.17.3.linux-amd64.tar.gz"], shell=True)
     subprocess.run([f"echo export PATH=$PATH:/usr/local/go/bin >> {home_dir}/.zshrc"], shell=True)
-    subprocess.run([f"source {home_dir}/.zshrc"], shell=True)
+    subprocess.run([f"export PATH=$PATH:/usr/local/go/bin && source {home_dir}/.zshrc"], shell=True)
     install_check = subprocess.run(["go version"], shell=True)
     if install_check.returncode == 0:
         print("[+] Go installed successfully!")
