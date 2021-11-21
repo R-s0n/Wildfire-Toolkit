@@ -5,7 +5,7 @@ from time import sleep
 def install_go():
     # To Update: https://golang.org/doc/install
     home_dir = get_home_dir()
-    subprocess.run([f"sudo apt-get install -y golang-go; sudo apt-get install -y gccgo-go; mkdir {home_dir}/go;"], shell=True)
+    subprocess.run([f"sudo apt-get update && sudo apt-get install -y golang-go; sudo apt-get install -y gccgo-go; mkdir {home_dir}/go;"], shell=True)
     install_check = subprocess.run(["go version"], shell=True)
     if install_check.returncode == 0:
         print("[+] Go installed successfully!")
