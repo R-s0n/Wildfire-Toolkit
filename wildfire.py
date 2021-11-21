@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import requests, argparse, subprocess, sys, json
 from datetime import datetime
 
