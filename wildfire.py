@@ -1,4 +1,4 @@
-import requests, argparse, subprocess, sys, json
+import requests, argparse, subprocess, json
 from datetime import datetime
 
 class Timer:
