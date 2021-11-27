@@ -2,6 +2,22 @@ import subprocess, argparse
 from wildfire import Timer
 from time import sleep
 
+def go_install():
+    home_dir = get_home_dir()
+    print("[!] Go is NOT installed -- Installing now...")
+    try:
+        subprocess.run([f"sudo apt-get update && sudo apt-get install -y golang-go; sudo apt-get install -y gccgo-go; mkdir {home_dir}/go;"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
+        print("[+] Go was successfully installed")
+    except Exception as e:
+        exception = str(e)
+        print(f"[!] Something went wrong!  Exception:\n{exception}")
+
+def go_check():
+    go_check = subprocess.run(["go version"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if go_check.returncode == 0:
+        return True
+    return False
+
 def install_go():
     # To Update: https://golang.org/doc/install
     home_dir = get_home_dir()

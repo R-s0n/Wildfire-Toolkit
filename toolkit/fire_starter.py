@@ -63,11 +63,6 @@ if hasDomain is False or hasServer is False or hasPort is False:
 get_home_dir = subprocess.run(["echo $HOME"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
 home_dir = get_home_dir.stdout.replace("\n", "")
 
-now_start = datetime.now().strftime("%d-%m-%y_%I%p")
-f = open(f"{home_dir}/Logs/automation.log", "a")
-f.write(f"Fire_starter.py - Start Time: {now_start}\n")
-f.close()
-
 r = requests.post(f'http://{server_ip}:{server_port}/api/auto', data={'fqdn':fqdn})
 thisFqdn = r.json()
 
@@ -536,10 +531,5 @@ message_json = {'text':f'The subdomain list for {fqdn} has been updated with {ne
 f = open(f'{home_dir}/.keys/slack_web_hook')
 token = f.read()
 slack_auto = requests.post(f'https://hooks.slack.com/services/{token}', json=message_json)
-
-now_end = datetime.now().strftime("%d-%m-%y_%I%p")
-f = open(f"{home_dir}/Logs/automation.log", "a")
-f.write(f"Fire_starter.py - End Time: {now_end}\n")
-f.close()
 
 print(f"[+] Fire_Starter completed successfully in {runtime_minutes} minutes!")

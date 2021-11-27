@@ -35,12 +35,10 @@ def start(args):
     fqdn_json = json.loads(res.text)
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
-        if fqdn['fqdn'] != args.blacklist:
+        if fqdn['fqdn'] not in args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Fire-Starter Modules (Subdomain Recon) against {seed}")
-            subprocess.run([f'python3 toolkit/fire_starter.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
-            subprocess.run([f'python3 toolkit/clear_sky.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
-            subprocess.run([f'python3 toolkit/kindling.py -d {seed} -s {args.server} -p {args.port} '], shell=True)
+            subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} '], shell=True)
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
@@ -50,7 +48,7 @@ def spread(args):
     fqdn_json = json.loads(res.text)
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
-        if fqdn['fqdn'] != args.blacklist:
+        if fqdn['fqdn'] not in args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Fire-Spreader Modules (Server/Port Recon) against {seed}")
             subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
@@ -64,7 +62,7 @@ def scan(args):
     fqdn_json = json.loads(res.text)
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
-        if fqdn['fqdn'] != args.blacklist:
+        if fqdn['fqdn'] not in args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Drifting-Embers Modules (Vuln Scanning) against {seed}")
             subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t ~/nuclei-templates'], shell=True)
@@ -79,7 +77,7 @@ def enum(args):
     fqdn_json = json.loads(res.text)
     sorted_fqdns = sort_fqdns(fqdn_json)
     for fqdn in sorted_fqdns:
-        if fqdn['fqdn'] != args.blacklist:
+        if fqdn['fqdn'] not in args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Enumeration Modules against {seed}")
             subprocess.run([f'python3 toolkit/ignite.py -d {seed} -s {args.server} -p {args.port} -P {args.proxy} -t'], shell=True)
@@ -88,12 +86,22 @@ def enum(args):
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
 
+def build_blacklist(args):
+    if "," in args.blacklist:
+        blacklist_arr = args.blacklist.split(",")
+    else:
+        blacklist_arr = [args.blacklist]
+    for i in range(0,len(blacklist_arr)):
+        blacklist_arr[i] = blacklist_arr[i].strip()
+    args.blacklist = blacklist_arr
+    return args
+
 def arg_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('-S','--server', help='IP Address of MongoDB API', required=True)
     parser.add_argument('-P','--port', help='Port of MongoDB API', required=True)
     parser.add_argument('-p','--proxy', help='IP Address of Burp Suite Proxy', required=False)
-    parser.add_argument('-b','--blacklist', help='FQDN to Blacklist (skip) for this round of testing', required=False)
+    parser.add_argument('-b','--blacklist', help='FQDN to Blacklist (skip) for this round of testing.  Separate multiple FQDNs w/ a comma (Ex: -b example1.com,example2.com)', required=False)
     parser.add_argument('--start', help='Run Fire-Starter Modules', required=False, action='store_true')
     parser.add_argument('--spread', help='Run Fire-Spreader Modules (Expect a LONG scan time)', required=False, action='store_true')
     parser.add_argument('--scan', help='Run Vuln Scan Modules', required=False, action='store_true')
@@ -101,6 +109,7 @@ def arg_parse():
     return parser.parse_args()
 
 def main(args):
+    args = build_blacklist(args)
     wildfire_timer = Timer()
     if args.start is True and args.spread is True:
         start(args)

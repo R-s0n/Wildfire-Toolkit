@@ -72,10 +72,10 @@ f.close()
 
 now = datetime.now().strftime("%d-%m-%y_%I%p")
 
-subprocess.run([f"{home_dir}/go/bin/nuclei -t {template} -l /tmp/urls.txt -o {home_dir}/Reports/{fqdn}-{now}.json -json"], shell=True)
+subprocess.run([f"{home_dir}/go/bin/nuclei -t {template} -l /tmp/urls.txt -o /tmp/{fqdn}-{now}.json -json"], shell=True)
 
 try:
-    f = open(f"{home_dir}/Reports/{fqdn}-{now}.json")
+    f = open(f"/tmp/{fqdn}-{now}.json")
     results = f.read().split("\n")
     data = []
     for result in results:
@@ -108,12 +108,4 @@ try:
         token = f.read()
         slack_auto = requests.post(f'https://hooks.slack.com/services/{token}', json=message_json)     
 except Exception as e:
-    f = open(f"{home_dir}/Logs/automation.log", "a")
-    f.write(f"Nuclei - Template: {template} - No Results Found\n")
-    f.close()
-
-now_end = datetime.now().strftime("%d-%m-%y_%I%p")
-f = open(f"{home_dir}/Logs/automation.log", "a")
-f.write(f"Nuclei - Template: {template} - End Time: {now_end}\n")
-f.close()
-
+    print(str(e))

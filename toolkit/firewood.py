@@ -83,7 +83,7 @@ else:
     masscan_data = json.loads(data)
     f.close()
     print("[+] Dnmasscan completed successfully!")
-    print("[-] Packaging data for database optimization...")
+    print("[-] Packaging data for database...")
     data_arr = []
     for server in masscan_data:
         data_arr.append(f"{server['ip']}:{server['ports'][0]['port']}")

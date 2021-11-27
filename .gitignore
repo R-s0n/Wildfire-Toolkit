@@ -2,3 +2,4 @@ bin/node_modules/**
 bin/package-lock.json
 bin/package.json
 __pycache__/
+wordlists/tls-results.json
