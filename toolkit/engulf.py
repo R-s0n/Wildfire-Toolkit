@@ -22,7 +22,7 @@ def get_endpoints_from_url_object(thisUrl):
 
 def get_number_of_endpoints(endpoints):
     counter = 0
-    for endpoint in sorted_endpoints:
+    for endpoint in endpoints:
         if str(endpoint['statusCode'])[0] == '2':
             counter += 1
     print(f"[-] Starting parameter enumeration on {thisUrl['url']}")
@@ -45,7 +45,7 @@ def run_arjun_get(args, sorted_endpoints, url):
                 thisEndpoint = "/"
             target = url + thisEndpoint
             print(f"[-] Scanning {target} for hidden parameters...")
-            subprocess.run([f"arjun -u {target} -oJ ../temp/arjun-test.tmp -w ../wordlists/params.txt -oB {args.proxy}:8080 -q"], shell=True)
+            subprocess.run([f"arjun -u {target}  -oJ ../temp/arjun-test.tmp -oT arjun-text.txt -w ../wordlists/params.txt -oB {args.proxy}:8080"], shell=True)
             with open('../temp/arjun-test.tmp') as json_file:
                 data = json.load(json_file)
             print(f"[+] Scan complete!")
@@ -85,7 +85,7 @@ def run_arjun_post(args, sorted_endpoints, url):
                 thisEndpoint = "/"
             target = url + thisEndpoint
             print(f"[-] Scanning {target} for hidden parameters...")
-            subprocess.run([f"arjun -u {target} -oJ ../temp/arjun-test.tmp -w ../wordlists/params.txt -oB {args.proxy}:8080 -q -m POST"], shell=True)
+            subprocess.run([f"arjun -u {target}  -oJ ../temp/arjun-test.tmp -oT arjun-text.txt -w ../wordlists/params.txt -oB {args.proxy}:8080 -q -m POST"], shell=True)
             with open('../temp/arjun-test.tmp') as json_file:
                 data = json.load(json_file)
             print(f"[+] Scan complete!")
@@ -108,7 +108,7 @@ def run_arjun_post(args, sorted_endpoints, url):
                 print(f"[!] Database updated failed.  ")
                 print(f"[!] {e}")
 
-def run_arjun_post_json(args, sorted_endpoints, url):
+def run_arjun_json(args, sorted_endpoints, url):
     for endpoint in sorted_endpoints:
         if str(endpoint['statusCode'])[0] == '2' and len(endpoint['arjunJson']['params']) < 1:
             print(f"[-] Target Endpoint: {endpoint['endpoint']}\n[-] Status: {endpoint['statusCode']} -- Length: {endpoint['responseLength']}")
@@ -125,7 +125,7 @@ def run_arjun_post_json(args, sorted_endpoints, url):
                 thisEndpoint = "/"
             target = url + thisEndpoint
             print(f"[-] Scanning {target} for hidden parameters...")
-            subprocess.run([f"arjun -u {target} -oJ ../temp/arjun-test.tmp -w ../wordlists/params.txt -oB {args.proxy}:8080 -q -m JSON"], shell=True)
+            subprocess.run([f"arjun -u {target}  -oJ ../temp/arjun-test.tmp -oT arjun-text.txt -w ../wordlists/params.txt -oB {args.proxy}:8080 -q -m JSON"], shell=True)
             with open('../temp/arjun-test.tmp') as json_file:
                 data = json.load(json_file)
             print(f"[+] Scan complete!")

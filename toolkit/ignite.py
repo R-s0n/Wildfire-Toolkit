@@ -108,7 +108,7 @@ def crawl_scan(args, target_url_string, blacklist=[], filter_regex="404 Not Foun
         if "." in url[-6:] and ".com" not in url[-6:] and ".org" not in url[-6:] and ".gov" not in url[-6:]:
             print(f"[!] Skipping File {url}...")
             continue
-        res = requests.get(url)
+        res = requests.get(url, verify=False)
         soup = BeautifulSoup(res.text, 'html.parser')
         links = soup.findAll('a')
         javasoup = BeautifulSoup(get_soup(url), 'html.parser')
@@ -226,7 +226,7 @@ def random_string(size=50, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 def write_xml_file(url):
-    res = requests.get(url)
+    res = requests.get(url, verify=False)
     with open('../temp/xml.tmp', 'wb') as f:
         f.write(res.content)
     f.close()
@@ -243,7 +243,7 @@ def check_scripts(args, target_url_string, scripts):
             continue
         print(f"{target_url_string}{source}")
         try:
-            res = requests.get(f"{target_url_string}{source}")
+            res = requests.get(f"{target_url_string}{source}", verify=False)
             if res.status_code == 200:
                 result_data = {"endpoint":script['src'], "statusCode":200, "responseLength":000}
                 thisUrl['endpoints'].append(result_data)
@@ -253,7 +253,7 @@ def check_scripts(args, target_url_string, scripts):
     update_url(args, thisUrl)
 
 def check_xml_sitemap(args, target_url_string, filter_regex, sitemap_endpoint="/sitemap.xml"):
-    res = requests.get(f"{target_url_string}{sitemap_endpoint}")
+    res = requests.get(f"{target_url_string}{sitemap_endpoint}", verify=False)
     if res.status_code == 200:
         print("[+] Found sitemap.xml!")
         thisUrl = get_target_url_object(args, target_url_string)
@@ -304,7 +304,7 @@ def check_xml_sitemap(args, target_url_string, filter_regex, sitemap_endpoint="/
             
 
 def check_robots(args, target_url_string):
-    res = requests.get(f"{target_url_string}/robots.txt")
+    res = requests.get(f"{target_url_string}/robots.txt", verify=False)
     if res.status_code == 200:
         print("[+] Found Robots.txt!")
         robots = res.text
@@ -314,23 +314,27 @@ def check_robots(args, target_url_string):
             if "Disallow" in robot:
                 temp_endpoint = robot.split(":")[1]
                 temp_endpoint = temp_endpoint.replace(" /", "/")
-                temp_endpoint = temp_endpoint.replace("/*", "")
+                if len(temp_endpoint) < 3:
+                    temp_endpoint = temp_endpoint.replace("/*", "")
                 length = len(temp_endpoint)
                 if temp_endpoint[length-1:] == "/":
                     temp_endpoint = temp_endpoint[:length-1]
                 endpoints.append(temp_endpoint)
         thisUrl = get_target_url_object(args, target_url_string)
         for endpoint in endpoints:
-            res_two = requests.get(f'{target_url_string}{endpoint}')
-            if res_two.status_code < 400:
-                result_data = {"endpoint":endpoint, "statusCode":res_two.status_code, "responseLength":000}
-                thisUrl['endpoints'].append(result_data)
+            try:
+                res_two = requests.get(f'{target_url_string}{endpoint}', verify=False)
+                if res_two.status_code < 400:
+                    result_data = {"endpoint":endpoint, "statusCode":res_two.status_code, "responseLength":000}
+                    thisUrl['endpoints'].append(result_data)
+            except Exception as e:
+                print(f"[!] Something went wrong when accessing {target_url_string}{endpoint}!  Skipping...")
         update_url(args, thisUrl)
 
 
 def check_thisdoesnotexist(args, target_url_string):
     rand_string = random_string()
-    res = requests.get(f"{target_url_string}/{rand_string}")
+    res = requests.get(f"{target_url_string}/{rand_string}", verify=False)
     if res.status_code != 404:
         soup = BeautifulSoup(res.text, 'html.parser')
         try:
@@ -349,7 +353,7 @@ def check_dynamic_routing(args, target_url_string):
     blacklist = []
     for endpoint in endpoint_list:
         try:
-            res = requests.get(f"{target_url_string}{endpoint}/{rand_string}")
+            res = requests.get(f"{target_url_string}{endpoint}/{rand_string}", verify=False)
             if res.status_code == 200:
                 print(f"[!] {endpoint} appears to be dynamic.  Adding to blacklist...")
                 blacklist.append(endpoint)
@@ -365,7 +369,7 @@ def final_status_check(args, target_url_string):
     for endpoint in thisUrl['endpoints']:
         try:
             endpoint_string = endpoint['endpoint']
-            res = requests.get(f"{target_url_string}{endpoint_string}")
+            res = requests.get(f"{target_url_string}{endpoint_string}", verify=False)
             if res.status_code != 404:
                 new_url_endpoints.append(endpoint)
         except Exception as e:

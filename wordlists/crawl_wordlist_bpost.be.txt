@@ -1,0 +1,12 @@
+/search
+/error
+/info
+/phpinfo.php
+/locator
+/favicon
+/postoffice
+/index.php
+/favicon.ico
+/search
+/error
+/info
