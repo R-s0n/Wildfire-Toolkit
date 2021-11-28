@@ -174,6 +174,18 @@ def subfinder(args, home_dir, thisFqdn):
     except Exception as e:
         print(f"[!] Something went wrong!  Exception: {str(e)}")
 
+def subfinder_recursive(args, home_dir, thisFqdn):
+    try:
+        subprocess.run([f'{home_dir}/go/bin/subfinder -d {args.fqdn} -recursive -o /tmp/subfinder.tmp'], shell=True)
+        f = open(f"/tmp/subfinder.tmp", "r")
+        subfinder_arr = f.read().rstrip().split("\n")
+        f.close()
+        subprocess.run(["rm -rf /tmp/subfinder.tmp"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+        thisFqdn['recon']['subdomains']['subfinder'] = subfinder_arr
+        update_fqdn_obj(args, thisFqdn)
+    except Exception as e:
+        print(f"[!] Something went wrong!  Exception: {str(e)}")
+
 def github_subdomains(args, home_dir, thisFqdn):
     try:
         f = open(f"{home_dir}/.keys/.keystore", "r")
@@ -190,7 +202,7 @@ def github_subdomains(args, home_dir, thisFqdn):
             for link in github_search_arr:
                 if link not in github_search_iteration_arr:
                     github_search_iteration_arr.append(link)
-            print(f"[-] Iteration {i} complete!")
+            print(f"[-] Iteration {i} complete -- {len(github_search_arr)} subdomains found this round!")
         thisFqdn['recon']['subdomains']['githubSearch'] = github_search_iteration_arr
         update_fqdn_obj(args, thisFqdn)
     except Exception as e:
@@ -198,7 +210,7 @@ def github_subdomains(args, home_dir, thisFqdn):
 
 def gospider(args, home_dir, thisFqdn):
     try:
-        subprocess.run([f'cd {home_dir}/go/bin;  ./gospider -s "https://{args.fqdn}" -o /tmp/gospider -c 10 -d 1 --other-source --include-subs'], shell=True)
+        subprocess.run([f'cd {home_dir}/go/bin; ./gospider -s "https://{args.fqdn}" -o /tmp/gospider -c 10 -d 1 --other-source --subs --include-subs'], shell=True)
         fqdn = args.fqdn
         outputFile = fqdn.replace(".", "_")
         f = open(f"/tmp/gospider/{outputFile}", "r")
@@ -218,9 +230,34 @@ def gospider(args, home_dir, thisFqdn):
     except Exception as e:
         print(f"[!] Something went wrong!  Exception: {str(e)}")
 
+def gospider_deep(home_dir, thisFqdn):
+    try:
+        f = open('wordlists/crawl_list.tmp', 'r')
+        domain_arr = f.read().rstrip().split("\n")
+        for domain in domain_arr:
+            subprocess.run([f'cd {home_dir}/go/bin; ./gospider -s "{domain}" -o /tmp/gospider -c 10 -d 1 --other-source --subs --include-subs'], shell=True)
+            fqdn = domain.split("/")[2]
+            outputFile = fqdn.replace(".", "_")
+            f = open(f"/tmp/gospider/{outputFile}", "r")
+            gospider_arr = f.read().rstrip().split("\n")
+            gospider_link_arr = []
+            for line in gospider_arr:
+                new_arr = line.split(" ")
+                if len(new_arr) > 2:
+                    temp_arr = new_arr[2].split("/")
+                    if len(temp_arr) > 2:
+                        if temp_arr[2] not in gospider_link_arr:
+                            gospider_link_arr.append(temp_arr[2])
+            f.close()
+        subprocess.run(["rm -rf /tmp/gospider"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+        thisFqdn['recon']['subdomains']['gospider'] = gospider_link_arr
+        update_fqdn_obj(args, thisFqdn)
+    except Exception as e:
+        print(f"[!] Something went wrong!  Exception: {str(e)}")
+
 def subdomainizer(home_dir, thisFqdn):
     try:
-        subprocess.run([f"python3 {home_dir}/Tools/SubDomainizer/SubDomainizer.py -l /tmp/amass.tmp -o /tmp/subdomainizer.tmp"], shell=True)
+        subprocess.run([f"python3 {home_dir}/Tools/SubDomainizer/SubDomainizer.py -l wordlists/crawl_list.tmp -o /tmp/subdomainizer.tmp"], shell=True)
         f = open("/tmp/subdomainizer.tmp", "r")
         subdomainizer_arr = f.read().rstrip().split("\n")
         f.close()
@@ -307,6 +344,13 @@ def httprobe(args, home_dir, thisFqdn):
     thisFqdn['recon']['subdomains']['httprobeRemoved'] = httprobeRemoved
     update_fqdn_obj(args, thisFqdn)
 
+def build_crawl_list(thisFqdn):
+    live_servers = thisFqdn['recon']['subdomains']['httprobe']
+    f = open('wordlists/crawl_list.tmp', 'w')
+    for domain in live_servers:
+        f.write(f"{domain}\n")
+    f.close()
+
 # Clear Sky
 
 def get_aws_ip_ranges():
@@ -371,7 +415,7 @@ def send_slack_notification(home_dir, text):
     token = f.read()
     requests.post(f'https://hooks.slack.com/services/{token}', json=message_json)
 
-def build_cewl_wordlist(args, home_dir, thisFqdn):
+def build_cewl_wordlist(args):
     subprocess.run([f'ls; cewl -d 2 -m 5 -o -a -v -w wordlists/cewl_{args.fqdn}.txt https://{args.fqdn}'], shell=True)
 
 def get_home_dir():
@@ -386,8 +430,8 @@ def update_fqdn_obj(args, thisFqdn):
     requests.post(f'http://{args.server}:{args.port}/api/auto/update', json=thisFqdn)
 
 def remove_wordlists():
-    subprocess.run(["rm wordlists/crawl_wordlist_*"], shell=True)
-    subprocess.run(["rm wordlists/cewl_**"], shell=True)
+    subprocess.run(["rm wordlists/crawl_*"], shell=True)
+    subprocess.run(["rm wordlists/cewl_*"], shell=True)
 
 def get_live_server_text(args, thisFqdn):
     length = len(thisFqdn['recon']['subdomains']['httprobeAdded'])
@@ -404,24 +448,34 @@ def arg_parse():
     parser.add_argument('-S','--server', help='IP Address of MongoDB API', required=True)
     parser.add_argument('-P','--port', help='Port of MongoDB API', required=True)
     parser.add_argument('-d','--fqdn', help='Name of the Root/Seed FQDN', required=True)
+    parser.add_argument('--deep', help='Crawl all live servers for subdomains', required=False, action='store_true')
     parser.add_argument('-u', '--update', help='Update AWS IP Certificate Data ( Can Take 48+ Hours! )', required=False, action='store_true')
     return parser.parse_args()
 
 def main(args):
     starter_timer = Timer()
-    sublist3r(args, get_home_dir(), get_fqdn_obj(args))
-    amass(args, get_fqdn_obj(args))
-    assetfinder(args, get_home_dir(), get_fqdn_obj(args))
-    gau(args, get_home_dir(), get_fqdn_obj(args))
-    crt(args, get_home_dir(), get_fqdn_obj(args))
-    shosubgo(args, get_home_dir(), get_fqdn_obj(args))
-    subfinder(args, get_home_dir(), get_fqdn_obj(args))
-    github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
-    gospider(args, get_home_dir(), get_fqdn_obj(args))
+    print("[-] Running Subdomain Scraping Modules...")
+    # sublist3r(args, get_home_dir(), get_fqdn_obj(args))
+    # amass(args, get_fqdn_obj(args))
+    # assetfinder(args, get_home_dir(), get_fqdn_obj(args))
+    # gau(args, get_home_dir(), get_fqdn_obj(args))
+    # crt(args, get_home_dir(), get_fqdn_obj(args))
+    # shosubgo(args, get_home_dir(), get_fqdn_obj(args))
+    # subfinder(args, get_home_dir(), get_fqdn_obj(args))
+    # subfinder_recursive(args, get_home_dir(), get_fqdn_obj(args))
+    # github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
+    # shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
+    # build_cewl_wordlist(args)
+    # shuffle_dns_custom(args, get_home_dir(), get_fqdn_obj(args))
+    # consolidate(args)
+    httprobe(args, get_home_dir(), get_fqdn_obj(args))
+    build_crawl_list(get_fqdn_obj(args))
+    if args.deep:
+        print(f"[-] Running DEEP Crawl Scan on {args.fqdn}...")
+        gospider_deep(get_home_dir(), get_fqdn_obj(args))
+    else:
+        gospider(args, get_home_dir(), get_fqdn_obj(args))
     subdomainizer(get_home_dir(), get_fqdn_obj(args))
-    shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
-    build_cewl_wordlist(args, get_home_dir(), get_fqdn_obj(args))
-    shuffle_dns_custom(args, get_home_dir(), get_fqdn_obj(args))
     if not check_clear_sky_data():
         if not args.update:
             print("[!] Clear Sky data not found!  Skipping AWS IP range scan...")
