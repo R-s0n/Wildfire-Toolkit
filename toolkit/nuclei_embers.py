@@ -74,38 +74,41 @@ now = datetime.now().strftime("%d-%m-%y_%I%p")
 
 subprocess.run([f"{home_dir}/go/bin/nuclei -t {template} -l /tmp/urls.txt -o /tmp/{fqdn}-{now}.json -json"], shell=True)
 
-try:
-    f = open(f"/tmp/{fqdn}-{now}.json")
-    results = f.read().split("\n")
-    data = []
-    for result in results:
+f = open(f"/tmp/{fqdn}-{now}.json")
+results = f.read().split("\n")
+data = []
+counter = 0
+for result in results:
+    counter += 1
+    try:
         if len(result) < 5:
             i = results.index(result)
             del results[i]
             continue
         json_result = json.loads(result)
         data.append(json_result)
-    res = requests.post(f"http://{server_ip}:{server_port}/api/auto", data={"fqdn":fqdn})
-    thisFqdn = res.json()
-    thisFqdn['vulns'] = data
-    requests.post(f'http://{server_ip}:{server_port}/api/auto/update', json=thisFqdn, headers={'Content-type':'application/json'})
-    info_counter = 0
-    non_info_counter = 0
-    for result in data:
-        if result['info']['severity'] == 'info':
-            info_counter += 1
-            result['impactful'] = False
-        else :
-            non_info_counter += 1
-            result['impactful'] = True
-    end = time.time()
-    runtime_seconds = math.floor(end - start)
-    runtime_minutes = math.floor(runtime_seconds / 60)
-    target_count = len(urls)
-    if non_info_counter > 0:
-        message_json = {'text':f'Nuclei Scan Completed!\n\nResults:\nWeb Servers Scanned: {target_count}\nRood/Seed Targeted: {fqdn}\nTemplate Category: {template}\nImpactful Results: {non_info_counter}\nInformational Results: {info_counter}\nScan Time: {runtime_minutes} minutes\nReport Location: {home_dir}/Reports/{template}-{now}.json\n\nNothing wrong with a little Spray and Pray!!  :pray:','username':'Vuln Disco Box','icon_emoji':':dart:'}
-        f = open(f'{home_dir}/.keys/slack_web_hook')
-        token = f.read()
-        slack_auto = requests.post(f'https://hooks.slack.com/services/{token}', json=message_json)     
-except Exception as e:
-    print(str(e))
+    except Exception as e:
+        print(f"[!] Failed to load result on line {counter}!  Skipping...")
+        print(f"[!] Excpetion: {e}")
+res = requests.post(f"http://{server_ip}:{server_port}/api/auto", data={"fqdn":fqdn})
+thisFqdn = res.json()
+thisFqdn['vulns'] = data
+requests.post(f'http://{server_ip}:{server_port}/api/auto/update', json=thisFqdn, headers={'Content-type':'application/json'})
+info_counter = 0
+non_info_counter = 0
+for result in data:
+    if result['info']['severity'] == 'info':
+        info_counter += 1
+        result['impactful'] = False
+    else :
+        non_info_counter += 1
+        result['impactful'] = True
+end = time.time()
+runtime_seconds = math.floor(end - start)
+runtime_minutes = math.floor(runtime_seconds / 60)
+target_count = len(urls)
+if non_info_counter > 0:
+    message_json = {'text':f'Nuclei Scan Completed!\n\nResults:\nWeb Servers Scanned: {target_count}\nRood/Seed Targeted: {fqdn}\nTemplate Category: {template}\nImpactful Results: {non_info_counter}\nInformational Results: {info_counter}\nScan Time: {runtime_minutes} minutes\nReport Location: {home_dir}/Reports/{template}-{now}.json\n\nNothing wrong with a little Spray and Pray!!  :pray:','username':'Vuln Disco Box','icon_emoji':':dart:'}
+    f = open(f'{home_dir}/.keys/slack_web_hook')
+    token = f.read()
+    slack_auto = requests.post(f'https://hooks.slack.com/services/{token}', json=message_json)     

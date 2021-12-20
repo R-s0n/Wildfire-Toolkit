@@ -39,7 +39,7 @@ def start(args):
             seed = fqdn['fqdn']
             print(f"[-] Running Fire-Starter Modules (Subdomain Recon) against {seed}")
             if args.deep:
-                subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} --deep'], shell=True)
+                subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy} --deep'], shell=True)
             else:
                 subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} '], shell=True)
         else:
@@ -69,7 +69,7 @@ def scan(args):
             seed = fqdn['fqdn']
             print(f"[-] Running Drifting-Embers Modules (Vuln Scanning) against {seed}")
             subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t ~/nuclei-templates'], shell=True)
-            subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+            # subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
             # subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")

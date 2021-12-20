@@ -257,7 +257,7 @@ def gospider_deep(home_dir, thisFqdn):
 
 def subdomainizer(home_dir, thisFqdn):
     try:
-        subprocess.run([f"python3 {home_dir}/Tools/SubDomainizer/SubDomainizer.py -l wordlists/crawl_list.tmp -o /tmp/subdomainizer.tmp"], shell=True)
+        subprocess.run([f"python3 {home_dir}/Tools/SubDomainizer/SubDomainizer.py -l wordlists/crawl_list.tmp -o /tmp/subdomainizer.tmp -sop /tmp/secrets.tmp"], shell=True)
         f = open("/tmp/subdomainizer.tmp", "r")
         subdomainizer_arr = f.read().rstrip().split("\n")
         f.close()
@@ -326,7 +326,7 @@ def httprobe(args, home_dir, thisFqdn):
     f = open("/tmp/consolidated_list.tmp", "w")
     f.write(subdomainStr)
     f.close()
-    httprobe_results = subprocess.run([f"cat /tmp/consolidated_list.tmp | {home_dir}/go/bin/httprobe -t 20000 -c 50 -p http:8080 -p http:8000 -p http:8008 -p https:8443 -p https:44300 -p https:44301"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
+    httprobe_results = subprocess.run([f"cat /tmp/consolidated_list.tmp | {home_dir}/go/bin/httprobe -t 8000 -c 500 -p http:8080 -p http:8000 -p http:8008 -p https:8443 -p https:44300 -p https:44301"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
     r = requests.post(f'http://{args.server}:{args.port}/api/auto', data={'fqdn':args.fqdn})
     thisFqdn = r.json()
     httprobe = httprobe_results.stdout.split("\n")
@@ -346,10 +346,24 @@ def httprobe(args, home_dir, thisFqdn):
 
 def build_crawl_list(thisFqdn):
     live_servers = thisFqdn['recon']['subdomains']['httprobe']
-    f = open('wordlists/crawl_list.tmp', 'w')
+    f = open('wordlists/live_servers.tmp', 'w')
     for domain in live_servers:
         f.write(f"{domain}\n")
     f.close()
+    subprocess.run([f"ffuf -u 'FUZZ' -fc 403 -w wordlists/live_servers.tmp -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36' -o /tmp/build_crawl_list.tmp"], shell=True)
+    with open('/tmp/build_crawl_list.tmp', 'r') as json_file:
+        data = json.load(json_file)
+    f = open("wordlists/crawl_list.tmp", 'w')
+    for result in data['results']:
+        subdomain = result['input']['FUZZ']
+        print(subdomain)
+        try:
+            subdomain = subdomain.split("/")[2]
+            f.write(f"{subdomain}\n")
+        except:
+            continue
+    f.close()
+
 
 # Clear Sky
 
@@ -432,6 +446,7 @@ def update_fqdn_obj(args, thisFqdn):
 def remove_wordlists():
     subprocess.run(["rm wordlists/crawl_*"], shell=True)
     subprocess.run(["rm wordlists/cewl_*"], shell=True)
+    subprocess.run(["rm wordlists/live_*"], shell=True)
 
 def get_live_server_text(args, thisFqdn):
     length = len(thisFqdn['recon']['subdomains']['httprobeAdded'])
@@ -443,10 +458,20 @@ def get_live_server_text(args, thisFqdn):
             message_urls_string += f"{url}\n"
         return f'This scan of {args.fqdn} discovered the following URLs went live since the last scan:\n\n{message_urls_string}\nHappy Hunting :)'
 
+def populate_burp(args, thisFqdn):
+    url_list = thisFqdn['recon']['subdomains']['httprobe']
+    f = open('/tmp/populate_burp.tmp', 'w')
+    for url in url_list:
+        f.write(f'{url}\n')
+    f.close()
+    subprocess.run([f"ffuf -u 'FUZZ' -w /tmp/populate_burp.tmp -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36' -replay-proxy 'http://{args.proxy}:8080'"], shell=True)
+    subprocess.run([f"rm /tmp/populate_burp.tmp"], shell=True)
+
 def arg_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('-S','--server', help='IP Address of MongoDB API', required=True)
     parser.add_argument('-P','--port', help='Port of MongoDB API', required=True)
+    parser.add_argument('-p','--proxy', help='IP Address of Burp Suite Proxy', required=False)
     parser.add_argument('-d','--fqdn', help='Name of the Root/Seed FQDN', required=True)
     parser.add_argument('--deep', help='Crawl all live servers for subdomains', required=False, action='store_true')
     parser.add_argument('-u', '--update', help='Update AWS IP Certificate Data ( Can Take 48+ Hours! )', required=False, action='store_true')
@@ -455,26 +480,26 @@ def arg_parse():
 def main(args):
     starter_timer = Timer()
     print("[-] Running Subdomain Scraping Modules...")
-    # sublist3r(args, get_home_dir(), get_fqdn_obj(args))
-    # amass(args, get_fqdn_obj(args))
-    # assetfinder(args, get_home_dir(), get_fqdn_obj(args))
-    # gau(args, get_home_dir(), get_fqdn_obj(args))
-    # crt(args, get_home_dir(), get_fqdn_obj(args))
-    # shosubgo(args, get_home_dir(), get_fqdn_obj(args))
-    # subfinder(args, get_home_dir(), get_fqdn_obj(args))
-    # subfinder_recursive(args, get_home_dir(), get_fqdn_obj(args))
-    # github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
-    # shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
-    # build_cewl_wordlist(args)
-    # shuffle_dns_custom(args, get_home_dir(), get_fqdn_obj(args))
-    # consolidate(args)
+    sublist3r(args, get_home_dir(), get_fqdn_obj(args))
+    amass(args, get_fqdn_obj(args))
+    assetfinder(args, get_home_dir(), get_fqdn_obj(args))
+    gau(args, get_home_dir(), get_fqdn_obj(args))
+    crt(args, get_home_dir(), get_fqdn_obj(args))
+    shosubgo(args, get_home_dir(), get_fqdn_obj(args))
+    subfinder(args, get_home_dir(), get_fqdn_obj(args))
+    subfinder_recursive(args, get_home_dir(), get_fqdn_obj(args))
+    github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
+    shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
+    build_cewl_wordlist(args)
+    shuffle_dns_custom(args, get_home_dir(), get_fqdn_obj(args))
+    consolidate(args)
     httprobe(args, get_home_dir(), get_fqdn_obj(args))
     build_crawl_list(get_fqdn_obj(args))
     if args.deep:
-        print(f"[-] Running DEEP Crawl Scan on {args.fqdn}...")
-        gospider_deep(get_home_dir(), get_fqdn_obj(args))
+         print(f"[-] Running DEEP Crawl Scan on {args.fqdn}...")
+         gospider_deep(get_home_dir(), get_fqdn_obj(args))
     else:
-        gospider(args, get_home_dir(), get_fqdn_obj(args))
+         gospider(args, get_home_dir(), get_fqdn_obj(args))
     subdomainizer(get_home_dir(), get_fqdn_obj(args))
     if not check_clear_sky_data():
         if not args.update:
@@ -488,6 +513,7 @@ def main(args):
     slack_text = f'The subdomain list for {args.fqdn} has been updated with {new_subdomain_length} new subdomains!'
     send_slack_notification(get_home_dir(), slack_text)
     httprobe(args, get_home_dir(), get_fqdn_obj(args))
+    populate_burp(args, get_fqdn_obj(args))
     send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args)))
     remove_wordlists()
     starter_timer.stop_timer()
