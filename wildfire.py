@@ -41,7 +41,7 @@ def start(args):
             if args.deep:
                 subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy} --deep'], shell=True)
             else:
-                subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} '], shell=True)
+                subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy}'], shell=True)
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
