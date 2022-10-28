@@ -76,7 +76,7 @@ def gau_check():
 
 def install_gau():
     home_dir = get_home_dir()
-    subprocess.run([f"wget https://github.com/lc/gau/releases/download/v2.1.2/gau_2.1.2_linux_amd64.tar.gz;tar xvf gau_2.1.2_linux_amd64.tar.gz;mv gau {home_dir}/go/bin/gau;rm gau_2.1.2_linux_amd64.tar.gz"], shell=True)
+    subprocess.run([f"cd {home_dir};wget https://github.com/lc/gau/releases/download/v2.1.2/gau_2.1.2_linux_amd64.tar.gz;tar xvf gau_2.1.2_linux_amd64.tar.gz;mv gau {home_dir}/go/bin/gau;rm gau_2.1.2_linux_amd64.tar.gz README.md LICENSE"], shell=True)
     install_check = subprocess.run([f"{home_dir}/go/bin/gau --help"], shell=True)
     if install_check.returncode == 0:
         print("[+] Gau installed successfully!")
