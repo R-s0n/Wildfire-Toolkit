@@ -119,6 +119,96 @@ def install_crt():
     else:
         print("[!] Something went wrong!  TLSHelpers was NOT installed successfully...")
 
+def subfinder_check():
+    home_dir = get_home_dir()
+    subfinder_check = subprocess.run([f"{home_dir}/go/bin/subfinder --help"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if subfinder_check.returncode == 0:
+        print("[+] Subfinder is already installed.")
+        return True
+    print("[!] Subfinder is NOT already installed.  Installing now...")
+    return False
+
+def install_subfinder():
+    home_dir = get_home_dir()
+    subprocess.run([f"cd {home_dir};wget https://github.com/projectdiscovery/subfinder/releases/download/v2.5.4/subfinder_2.5.4_linux_amd64.zip;unzip subfinder_2.5.4_linux_amd64.zip;mv subfinder {home_dir}/go/bin/subfinder;rm subfinder_2.5.4_linux_amd64.zip README.md LICENSE"], shell=True)
+    install_check = subprocess.run([f"{home_dir}/go/bin/subfinder --help"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] Subfinder installed successfully!")
+    else:
+        print("[!] Something went wrong!  Subfinder was NOT installed successfully...")
+
+def github_search_check():
+    home_dir = get_home_dir()
+    github_search_check = subprocess.run([f"ls {home_dir}/Tools/github-search/"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if github_search_check.returncode == 0:
+        print("[+] GitHub-Search is already installed.")
+        return True
+    print("[!] GitHub-Search is NOT already installed.  Installing now...")
+    return False
+
+def install_github_search():
+    home_dir = get_home_dir()
+    subprocess.run([f"cd {home_dir}/Tools;git clone https://github.com/gwen001/github-search.git"], shell=True)
+    install_check = subprocess.run([f"ls {home_dir}/Tools/github-search/"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] GitHub-Search installed successfully!")
+    else:
+        print("[!] Something went wrong!  GitHub-Search was NOT installed successfully...")
+
+def gospider_check():
+    home_dir = get_home_dir()
+    gospider_check = subprocess.run([f"{home_dir}/go/bin/gospider --help"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if gospider_check.returncode == 0:
+        print("[+] GoSpider is already installed.")
+        return True
+    print("[!] GoSpider is NOT already installed.  Installing now...")
+    return False
+
+def install_gospider():
+    home_dir = get_home_dir()
+    subprocess.run([f"cd {home_dir};wget https://github.com/jaeles-project/gospider/releases/download/v1.1.6/gospider_v1.1.6_linux_x86_64.zip;unzip -j gospider_v1.1.6_linux_x86_64.zip;mv gospider {home_dir}/go/bin/gospider;rm gospider_v1.1.6_linux_x86_64.zip README.md LICENSE.md"], shell=True)
+    install_check = subprocess.run([f"{home_dir}/go/bin/gospider --help"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] GoSpider installed successfully!")
+    else:
+        print("[!] Something went wrong!  GoSpider was NOT installed successfully...")
+
+def subdomainizer_check():
+    home_dir = get_home_dir()
+    subdomainizer_check = subprocess.run([f"ls {home_dir}/Tools/SubDomainizer/"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if subdomainizer_check.returncode == 0:
+        print("[+] SubDomainizer is already installed.")
+        return True
+    print("[!] SubDomainizer is NOT already installed.  Installing now...")
+    return False
+
+def install_subdomainizer():
+    home_dir = get_home_dir()
+    subprocess.run([f"cd {home_dir}/Tools;git clone https://github.com/nsonaniya2010/SubDomainizer.git"], shell=True)
+    install_check = subprocess.run([f"ls {home_dir}/Tools/SubDomainizer/"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] SubDomainizer installed successfully!")
+    else:
+        print("[!] Something went wrong!  SubDomainizer was NOT installed successfully...")
+
+def shuffledns_check():
+    home_dir = get_home_dir()
+    shuffledns_check = subprocess.run([f"{home_dir}/go/bin/shuffledns --help"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if shuffledns_check.returncode == 0:
+        print("[+] ShuffleDNS is already installed.")
+        return True
+    print("[!] ShuffleDNS is NOT already installed.  Installing now...")
+    return False
+
+def install_shuffledns():
+    home_dir = get_home_dir()
+    subprocess.run([f"cd {home_dir};wget https://github.com/projectdiscovery/shuffledns/releases/download/v1.0.8/shuffledns_1.0.8_linux_amd64.zip;unzip shuffledns_1.0.8_linux_amd64.zip;mv shuffledns {home_dir}/go/bin/shuffledns;rm shuffledns_1.0.8_linux_amd64.zip README.md LICENSE.md"], shell=True)
+    install_check = subprocess.run([f"{home_dir}/go/bin/shuffledns --help"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] ShuffleDNS installed successfully!")
+    else:
+        print("[!] Something went wrong!  ShuffleDNS was NOT installed successfully...")
+
 def install_go():
     # To Update: https://golang.org/doc/install
     home_dir = get_home_dir()
@@ -171,6 +261,16 @@ def main(args):
         install_crt()
     if shosubgo_check() is False:
         install_shosubgo()
+    if subfinder_check() is False:
+        install_subfinder()
+    if github_search_check() is False:
+        install_github_search()
+    if gospider_check() is False:
+        install_gospider()
+    if subdomainizer_check() is False:
+        install_subdomainizer()
+    if shuffledns_check() is False:
+        install_shuffledns()
     starter_timer.stop_timer()
     print(f"[+] Done!  Start: {starter_timer.get_start()}  |  Stop: {starter_timer.get_stop()}")
 
