@@ -125,7 +125,7 @@ def assetfinder(args, home_dir, thisFqdn):
 
 def gau(args, home_dir, thisFqdn):
     try:
-        subprocess.run([f"{home_dir}/go/bin/gau -subs {args.fqdn} | cut -d / -f 3 | sort -u > /tmp/gau.tmp"], shell=True)
+        subprocess.run([f"{home_dir}/go/bin/gau --subs {args.fqdn} | cut -d / -f 3 | sort -u > /tmp/gau.tmp"], shell=True)
         f = open(f"/tmp/gau.tmp", "r")
         gau_arr = f.read().rstrip().split("\n")
         f.close()
