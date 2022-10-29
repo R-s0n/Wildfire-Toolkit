@@ -187,7 +187,8 @@ def install_subdomainizer():
     subprocess.run([f"cd {home_dir}/Tools;git clone https://github.com/nsonaniya2010/SubDomainizer.git"], shell=True)
     install_check = subprocess.run([f"ls {home_dir}/Tools/SubDomainizer/"], shell=True)
     if install_check.returncode == 0:
-        print("[+] SubDomainizer installed successfully!")
+        print("[+] SubDomainizer downloaded successfully!  Installing required modules...")
+        subprocess.run([f"cd {home_dir}/Tools/SubDomainizer;pip3 install -r requirements.txt"], shell=True)
     else:
         print("[!] Something went wrong!  SubDomainizer was NOT installed successfully...")
 
