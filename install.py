@@ -210,6 +210,58 @@ def install_shuffledns():
     else:
         print("[!] Something went wrong!  ShuffleDNS was NOT installed successfully...")
 
+def httprobe_check():
+    home_dir = get_home_dir()
+    httprobe_check = subprocess.run([f"{home_dir}/go/bin/httprobe --help"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if httprobe_check.returncode == 0:
+        print("[+] Httprobe is already installed.")
+        return True
+    print("[!] Httprobe is NOT already installed.  Installing now...")
+    return False
+
+def install_httprobe():
+    home_dir = get_home_dir()
+    subprocess.run([f"go install github.com/tomnomnom/httprobe@latest"], shell=True)
+    install_check = subprocess.run([f"{home_dir}/go/bin/httprobe --help"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] Httprobe installed successfully!")
+    else:
+        print("[!] Something went wrong!  Httprobe was NOT installed successfully...")
+
+def tlsscan_check():
+    home_dir = get_home_dir()
+    tlsscan_check = subprocess.run([f"ls {home_dir}/Tools/tls-scan/tls-scan"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if tlsscan_check.returncode == 0:
+        print("[+] TLS-Scan is already installed.")
+        return True
+    print("[!] TLS-Scan is NOT already installed.  Installing now...")
+    return False
+
+def install_tlsscan():
+    home_dir = get_home_dir()
+    subprocess.run([f"cd {home_dir};wget https://github.com/prbinu/tls-scan/releases/download/1.4.8/tls-scan-1.4.8-linux-amd64.tar.gz;tar xvf tls-scan-1.4.8-linux-amd64.tar.gz;mv tls-scan {home_dir}/Tools/tls-scan;rm tls-scan-1.4.8-linux-amd64.tar.gz"], shell=True)
+    install_check = subprocess.run([f"ls {home_dir}/Tools/tls-scan/tls-scan"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] TLS-Scan installed successfully!")
+    else:
+        print("[!] Something went wrong!  TLS-Scan was NOT installed successfully...")
+
+def jq_check():
+    jq_check = subprocess.run([f"jq --help"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if jq_check.returncode == 0:
+        print("[+] JQ is already installed.")
+        return True
+    print("[!] JQ is NOT already installed.  Installing now...")
+    return False
+
+def install_jq():
+    subprocess.run([f"sudo apt-get install jq "], shell=True)
+    install_check = subprocess.run([f"jq --help"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] JQ installed successfully!")
+    else:
+        print("[!] Something went wrong!  JQ was NOT installed successfully...")
+
 def install_go():
     # To Update: https://golang.org/doc/install
     home_dir = get_home_dir()
@@ -272,6 +324,12 @@ def main(args):
         install_subdomainizer()
     if shuffledns_check() is False:
         install_shuffledns()
+    if httprobe_check() is False:
+        install_httprobe()
+    if tlsscan_check() is False:
+        install_tlsscan()
+    if jq_check() is False:
+        install_jq()
     starter_timer.stop_timer()
     print(f"[+] Done!  Start: {starter_timer.get_start()}  |  Stop: {starter_timer.get_stop()}")
 
