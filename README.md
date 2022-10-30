@@ -20,7 +20,7 @@ The Wildfire Toolkit has a variety of modules to accomplish different tasks.  In
 
 The Fire Starter module is designed to conduct Recon on the FQDN, looking for all available Subdomains for that Seed/Root.  These scripts use several different open-source tools to search for subdomains in three discinct ways:
 1. Scraping Public Resources (Google Dorking, Wayback Machine, etc.)
-2. Crawling Known Domains (<a href>, JavaScript links, etc.)
+2. Crawling Known Domains (Anchor Tags, JavaScript links, etc.)
 3. Subdomain Brute Forcing
 Once a list of possible subdomains has been discovered, the Fire Starter module consolidates this list into unique subdomains and probes each domain to see if it is hosing a live web server that can be accessed a client.
 
