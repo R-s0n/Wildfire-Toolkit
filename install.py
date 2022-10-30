@@ -203,7 +203,7 @@ def shuffledns_check():
 
 def install_shuffledns():
     home_dir = get_home_dir()
-    subprocess.run([f"cd {home_dir};wget https://github.com/projectdiscovery/shuffledns/releases/download/v1.0.8/shuffledns_1.0.8_linux_amd64.zip;unzip shuffledns_1.0.8_linux_amd64.zip;mv shuffledns {home_dir}/go/bin/shuffledns;rm shuffledns_1.0.8_linux_amd64.zip README.md LICENSE.md"], shell=True)
+    subprocess.run([f"sudo apt-get install -y massdns;cd {home_dir};wget https://github.com/projectdiscovery/shuffledns/releases/download/v1.0.8/shuffledns_1.0.8_linux_amd64.zip;unzip shuffledns_1.0.8_linux_amd64.zip;mv shuffledns {home_dir}/go/bin/shuffledns;rm shuffledns_1.0.8_linux_amd64.zip README.md LICENSE.md"], shell=True)
     install_check = subprocess.run([f"{home_dir}/go/bin/shuffledns --help"], shell=True)
     if install_check.returncode == 0:
         print("[+] ShuffleDNS installed successfully!")
@@ -261,6 +261,42 @@ def install_jq():
         print("[+] JQ installed successfully!")
     else:
         print("[!] Something went wrong!  JQ was NOT installed successfully...")
+
+def dnmasscan_check():
+    home_dir = get_home_dir()
+    dnmasscan_check = subprocess.run([f"ls {home_dir}/Tools/dnmasscan/"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if dnmasscan_check.returncode == 0:
+        print("[+] DNMasscan is already installed.")
+        return True
+    print("[!] DNMasscan is NOT already installed.  Installing now...")
+    return False
+
+def install_dnmasscan():
+    home_dir = get_home_dir()
+    subprocess.run([f"cd {home_dir}/Tools;git clone https://github.com/rastating/dnmasscan.git"], shell=True)
+    install_check = subprocess.run([f"ls {home_dir}/Tools/dnmasscan/"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] DNMasscan installed successfully!")
+    else:
+        print("[!] Something went wrong!  DNMasscan was NOT installed successfully...")
+
+def nuclei_check():
+    home_dir = get_home_dir()
+    nuclei_check = subprocess.run([f"{home_dir}/go/bin/nuclei --help"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, shell=True)
+    if nuclei_check.returncode == 0:
+        print("[+] Nuclei is already installed.")
+        return True
+    print("[!] Nuclei is NOT already installed.  Installing now...")
+    return False
+
+def install_nuclei():
+    home_dir = get_home_dir()
+    subprocess.run([f"cd {home_dir};git clone https://github.com/projectdiscovery/nuclei-templates.git;wget https://github.com/projectdiscovery/nuclei/releases/download/v2.7.8/nuclei_2.7.8_linux_amd64.zip;unzip nuclei_2.7.8_linux_amd64.zip;mv nuclei {home_dir}/go/bin/nuclei;rm nuclei_2.7.8_linux_amd64.zip"], shell=True)
+    install_check = subprocess.run([f"{home_dir}/go/bin/nuclei --help"], shell=True)
+    if install_check.returncode == 0:
+        print("[+] Nuclei installed successfully!")
+    else:
+        print("[!] Something went wrong!  Nuclei was NOT installed successfully...")
 
 def install_go():
     # To Update: https://golang.org/doc/install
@@ -330,6 +366,10 @@ def main(args):
         install_tlsscan()
     if jq_check() is False:
         install_jq()
+    if dnmasscan_check() is False:
+        install_dnmasscan()
+    if nuclei_check() is False:
+        install_nuclei()
     starter_timer.stop_timer()
     print(f"[+] Done!  Start: {starter_timer.get_start()}  |  Stop: {starter_timer.get_stop()}")
 
