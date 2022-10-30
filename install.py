@@ -255,7 +255,7 @@ def jq_check():
     return False
 
 def install_jq():
-    subprocess.run([f"sudo apt-get install jq "], shell=True)
+    subprocess.run([f"sudo apt-get install -y jq "], shell=True)
     install_check = subprocess.run([f"jq --help"], shell=True)
     if install_check.returncode == 0:
         print("[+] JQ installed successfully!")
@@ -323,7 +323,11 @@ def keystore():
         keystore_check = subprocess.run([f"ls {home_dir}/.keys"], shell=True)
         if keystore_check.returncode == 0:
             print("[+] Keys directory created successfully!")
-            subprocess.run([f"touch {home_dir}/.keys/slack_web_hook && touch {home_dir}/.keys/.keystore"], shell=True)
+            slack_key = input("[*] Please enter your Slack Token (ENTER to leave black and add later):\n")
+            github_key = input("[*] Please enter your GitHub PAT (ENTER to leave black and add later):\n")
+            shodan_key = input("[*] Please enter your Shodan API Key (ENTER to leave black and add later):\n")
+            subprocess.run([f"""echo "{slack_key}" > {home_dir}/.keys/slack_web_hook && echo "github:{github_key}" > {home_dir}/.keys/.keystore && echo "shodan:{shodan_key}" >> {home_dir}/.keys/.keystore"""], shell=True)
+
 
 def arg_parse():
     parser = argparse.ArgumentParser()
