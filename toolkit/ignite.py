@@ -3,13 +3,15 @@ import xmltodict
 from javasoup import get_soup
 from datetime import datetime
 from bs4 import BeautifulSoup
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def wordlist_scan(args, target_url_string, blacklist=[], filter_regex="404 Not Found", wordlist="start.txt"):
     home_dir = get_home_dir()
     thisUrl = get_target_url_object(args, target_url_string)
     print(filter_regex)
-    subprocess.run([f"{home_dir}/go/bin/ffuf -w '../wordlists/{wordlist}' -u {target_url_string}/FUZZ -H 'Te: trailers' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0' -recursion -recursion-depth 4 -timeout 3 -r -p 0.1-3.0 -sa -t 50 -fr '{filter_regex}' -fc 403,401 -replay-proxy http://{args.proxy}:8080 -o ../temp/ffuf-results.tmp -of json"], shell=True)
-    with open('../temp/ffuf-results.tmp') as json_file:
+    subprocess.run([f"{home_dir}/go/bin/ffuf -w 'wordlists/{wordlist}' -u {target_url_string}/FUZZ -H 'Te: trailers' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0' -recursion -recursion-depth 4 -timeout 3 -r -p 0.1-3.0 -sa -t 50 -fr '{filter_regex}' -fc 403,401 -replay-proxy http://{args.proxy}:8080 -o temp/ffuf-results.tmp -of json"], shell=True)
+    with open('temp/ffuf-results.tmp') as json_file:
         data = json.load(json_file)
     for result in data['results']:
         try:
@@ -57,8 +59,8 @@ def wordlist_scan_files(args, target_url_string, blacklist=[], filter_regex="404
             print("Skipping File...")
             print(endpoint)
             continue
-        subprocess.run([f"{home_dir}/go/bin/ffuf -w '../wordlists/files.txt' -u {target_url_string}{endpoint}/FUZZ -H 'Te: trailers' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0' -recursion -recursion-depth 4 -timeout 3 -r -p 0.1-3.0 -sa -t 50 -fr '{filter_regex}' -fc 403,401 -replay-proxy http://{args.proxy}:8080 -o ../temp/ffuf-results.tmp -of json"], shell=True)
-        with open('../temp/ffuf-results.tmp') as json_file:
+        subprocess.run([f"{home_dir}/go/bin/ffuf -w 'wordlists/files.txt' -u {target_url_string}{endpoint}/FUZZ -H 'Te: trailers' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0' -recursion -recursion-depth 4 -timeout 3 -r -p 0.1-3.0 -sa -t 50 -fr '{filter_regex}' -fc 403,401 -replay-proxy http://{args.proxy}:8080 -o temp/ffuf-results.tmp -of json"], shell=True)
+        with open('temp/ffuf-results.tmp') as json_file:
             data = json.load(json_file)
         for result in data['results']:
             if result['input']['FUZZ'][-1] == "/":
@@ -171,9 +173,9 @@ def crawl_scan(args, target_url_string, blacklist=[], filter_regex="404 Not Foun
                     thisUrl['endpoints'].append(result_data)
         write_wordlist(args, thisUrl)
         home_dir = get_home_dir()
-        subprocess.run([f"{home_dir}/go/bin/ffuf -w '../wordlists/crawl_wordlist_{args.domain}.txt' -u {url}FUZZ -recursion -recursion-depth 4 -r -p 0.1-3.0 -sa -t 50 -fr '{filter_regex}' -fc 403,401 -replay-proxy http://{args.proxy}:8080 -o ../temp/ffuf-results.tmp -of json"], shell=True)
+        subprocess.run([f"{home_dir}/go/bin/ffuf -w 'wordlists/crawl_wordlist_{args.domain}.txt' -u {url}FUZZ -recursion -recursion-depth 4 -r -p 0.1-3.0 -sa -t 50 -fr '{filter_regex}' -fc 403,401 -replay-proxy http://{args.proxy}:8080 -o temp/ffuf-results.tmp -of json"], shell=True)
         thisUrl = get_target_url_object(args, target_url_string)
-        with open('../temp/ffuf-results.tmp') as json_file:
+        with open('temp/ffuf-results.tmp') as json_file:
             data = json.load(json_file)
         for result in data['results']:
             try:
@@ -227,7 +229,7 @@ def random_string(size=50, chars=string.ascii_uppercase + string.digits):
 
 def write_xml_file(url):
     res = requests.get(url, verify=False)
-    with open('../temp/xml.tmp', 'wb') as f:
+    with open('temp/xml.tmp', 'wb') as f:
         f.write(res.content)
     f.close()
 
@@ -259,7 +261,7 @@ def check_xml_sitemap(args, target_url_string, filter_regex, sitemap_endpoint="/
         thisUrl = get_target_url_object(args, target_url_string)
         url = f"{target_url_string}/sitemap.xml"
         write_xml_file(url)
-        with open("../temp/xml.tmp") as xml_file:
+        with open("temp/xml.tmp") as xml_file:
             try:
                 data_dict = xmltodict.parse(xml_file.read())
                 xml_file.close()
@@ -267,14 +269,14 @@ def check_xml_sitemap(args, target_url_string, filter_regex, sitemap_endpoint="/
                 sitemap_json = json.loads(sitemap_string)
                 url_list = []
                 length = len(target_url_string)
-                f = open(f"../wordlists/sitemap_{args.domain}", 'w')
+                f = open(f"wordlists/sitemap_{args.domain}", 'w')
                 for location in sitemap_json['urlset']['url']:
                     endpoint = location['loc'][length:]
                     f.write(f"{endpoint}\n")
                 f.close()
                 home_dir = get_home_dir()
-                subprocess.run([f"{home_dir}/go/bin/ffuf -w '../wordlists/sitemap_{args.domain}' -u {target_url_string}FUZZ -H 'Te: trailers' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0' -recursion -recursion-depth 4 -r -p 0.1-3.0 -sa -t 50 -fr '{filter_regex}' -fc 403,401 -replay-proxy http://{args.proxy}:8080 -o ../temp/ffuf-results.tmp -of json"], shell=True)
-                with open('../temp/ffuf-results.tmp') as json_file:
+                subprocess.run([f"{home_dir}/go/bin/ffuf -w 'wordlists/sitemap_{args.domain}' -u {target_url_string}FUZZ -H 'Te: trailers' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0' -recursion -recursion-depth 4 -r -p 0.1-3.0 -sa -t 50 -fr '{filter_regex}' -fc 403,401 -replay-proxy http://{args.proxy}:8080 -o temp/ffuf-results.tmp -of json"], shell=True)
+                with open('temp/ffuf-results.tmp') as json_file:
                     data = json.load(json_file)
                 for result in data['results']:
                     result_data = {"endpoint":result['input']['FUZZ'], "statusCode":result['status'], "responseLength":result['length']}
@@ -299,7 +301,7 @@ def check_xml_sitemap(args, target_url_string, filter_regex, sitemap_endpoint="/
             except Exception as e:
                 # print(e)
                 print("[!] Failed to load sitemap.xml!  Skipping...")
-        subprocess.run(['rm ../wordlists/sitemap_*'], shell=True)
+        subprocess.run(['rm wordlists/sitemap_*'], shell=True)
         
             
 
@@ -379,13 +381,13 @@ def final_status_check(args, target_url_string):
     update_url(args, thisUrl)
 
 def write_wordlist(args, thisUrl):
-    f = open(f'../wordlists/crawl_wordlist_{args.domain}.txt', 'w')
+    f = open(f'wordlists/crawl_wordlist_{args.domain}.txt', 'w')
     for endpoint in thisUrl['endpoints']:
         f.write(f"{endpoint['endpoint']}\n")
     f.close()
 
 def delete_wordlists():
-    subprocess.run(["rm ../wordlists/crawl_wordlist_*; rm ../temp/*"], shell=True)
+    subprocess.run(["rm wordlists/crawl_wordlist_*; rm temp/*"], shell=True)
 
 def update_url(args, thisUrl):
     res = requests.post(f'http://{args.server}:{args.port}/api/url/auto/update', json=thisUrl, headers={'Content-type':'application/json'}, proxies={'http':f'http://{args.proxy}:8080'})
