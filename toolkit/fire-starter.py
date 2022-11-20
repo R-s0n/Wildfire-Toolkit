@@ -82,12 +82,52 @@ def sublist3r(args, home_dir, thisFqdn):
     except Exception as e:
         print(f"[!] Something went wrong!  Exception: {str(e)}")
 
+def remove_duplicate_ips(ip_list):
+    try:
+        clean_ip_list = []
+        for ip in ip_list:
+            if ip not in clean_ip_list:
+                clean_ip_list.append(ip)
+        return ip_list
+    except Exception as e:
+        print(f"[!] Something went wrong!  Exception: {str(e)}")
+
+def get_ips_from_amass(thisFqdn):
+    try:
+        amass_file = open(f"/tmp/amass.tmp", 'r')
+        amass_file_lines = amass_file.readlines()
+        amass_file.close()
+        ip_list = []
+        for line in amass_file_lines:
+            ip_string = line.strip().split(" ")[1]
+            if "," in ip_string:
+                new_ip_list = ip_string.split(",")
+                for ip in new_ip_list:
+                    if len(ip) > 4:
+                        ip_obj = {
+                            "ip": ip,
+                            "ports": []
+                        }
+                        ip_list.append(ip_obj)
+            else:
+                ip_obj = {
+                    "ip": ip_string,
+                    "ports": []
+                }
+                ip_list.append(ip_obj)
+        clean_ip_list = remove_duplicate_ips(ip_list)
+        thisFqdn['ips'] = clean_ip_list
+        return thisFqdn  
+    except Exception as e:
+        print(f"[!] Something went wrong!  Exception: {str(e)}")
+
 def amass(args, thisFqdn):
     try:
         regex = "{1,3}"
-        subprocess.run([f"amass enum -src -ip -brute -min-for-recursive 2 -timeout 60 -d {args.fqdn} -o /tmp/amass.tmp"], shell=True)
+        subprocess.run([f"amass enum -src -ip -brute -ipv4 -min-for-recursive 2 -timeout 60 -d {args.fqdn} -o /tmp/amass.tmp"], shell=True)
         subprocess.run([f"cp /tmp/amass.tmp /tmp/amass.full.tmp"], stdout=subprocess.DEVNULL, shell=True)
         subprocess.run([f"sed -i -E 's/\[(.*?)\] +//g' /tmp/amass.tmp"], stdout=subprocess.DEVNULL, shell=True)
+        thisFqdn = get_ips_from_amass(thisFqdn)
         subprocess.run([f"sed -i -E 's/ ([0-9]{regex}\.)[0-9].*//g' /tmp/amass.tmp"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         amass_file = open(f"/tmp/amass.tmp", 'r')
         amass_file_lines = amass_file.readlines()
@@ -330,6 +370,9 @@ def httprobe(args, home_dir, thisFqdn):
     r = requests.post(f'http://{args.server}:{args.port}/api/auto', data={'fqdn':args.fqdn})
     thisFqdn = r.json()
     httprobe = httprobe_results.stdout.split("\n")
+    for item in httprobe:
+        if len(item) < 2:
+            httprobe.remove(item)
     previous_httprobe = thisFqdn['recon']['subdomains']['httprobe']
     httprobeAdded = []
     httprobeRemoved = []
@@ -407,9 +450,9 @@ def check_clear_sky_data():
         return False
 
 def search_data(args, thisFqdn):
-    subprocess.run([f"""cat wordlists/tls-results.json | jq --slurp -r '.[]? | select(.certificateChain[]?.subject | test("\\\{args.fqdn}\\\W")) | .ip | @text' > wordlists/tls_filtered.tmp"""], shell=True)
+    subprocess.run([f"""cat wordlists/tls-results.json | jq --slurp -r '.[]? | select(.certificateChain[]?.subject | test("{args.fqdn}")) | .ip | @text' > wordlists/tls_filtered.tmp"""], shell=True)
     results_str = subprocess.run([f"cat wordlists/tls_filtered.tmp"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-    results_arr = results_str.stdout.split("\n")
+    results_arr = results_str.stdout.split("\n").pop()
     # if len(results_arr) < 10:
     #     subprocess.run([f"sudo nmap -T 4 -iL wordlists/tls_filtered.tmp -Pn --script=http-title -p- --open -oN reports/Clear-Sky_{args.search}_{now}"], shell=True)
     # else:

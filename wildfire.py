@@ -54,7 +54,8 @@ def spread(args):
         if fqdn['fqdn'] not in args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Fire-Spreader Modules (Server/Port Recon) against {seed}")
-            subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+            subprocess.run([f'python3 toolkit/fire-spreader.py -d {seed} -s {args.server} -p {args.port}'], shell=True)            
+            # subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
             subprocess.run([f'python3 toolkit/wind.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
