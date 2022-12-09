@@ -86,9 +86,10 @@ def remove_duplicate_ips(ip_list):
     try:
         clean_ip_list = []
         for ip in ip_list:
-            if ip not in clean_ip_list:
-                clean_ip_list.append(ip)
-        return ip_list
+            if ip in clean_ip_list:
+                continue
+            clean_ip_list.append(ip)            
+        return clean_ip_list
     except Exception as e:
         print(f"[!] Something went wrong!  Exception: {str(e)}")
 
