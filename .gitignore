@@ -6,3 +6,4 @@ wordlists/tls-results.json
 wordlists/tls-filtered.tmp
 config/**
 reports/**
+temp/**

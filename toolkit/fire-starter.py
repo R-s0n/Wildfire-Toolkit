@@ -85,7 +85,7 @@ def sublist3r(args, home_dir, thisFqdn):
 def amass(args, thisFqdn):
     try:
         regex = "{1,3}"
-        subprocess.run([f"amass enum -src -ip -brute -min-for-recursive 2 -d {args.fqdn} -o /tmp/amass.tmp"], shell=True)
+        subprocess.run([f"amass enum -src -ip -brute -min-for-recursive 2 -timeout 60 -d {args.fqdn} -o /tmp/amass.tmp"], shell=True)
         subprocess.run([f"cp /tmp/amass.tmp /tmp/amass.full.tmp"], stdout=subprocess.DEVNULL, shell=True)
         subprocess.run([f"sed -i -E 's/\[(.*?)\] +//g' /tmp/amass.tmp"], stdout=subprocess.DEVNULL, shell=True)
         subprocess.run([f"sed -i -E 's/ ([0-9]{regex}\.)[0-9].*//g' /tmp/amass.tmp"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
