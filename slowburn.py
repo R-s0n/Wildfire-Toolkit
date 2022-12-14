@@ -278,7 +278,7 @@ def slowburn_domains(args, domains):
             blacklist += f"{domain},"
         if random_domain not in current_domain_list:
             add_domain(random_domain, args)
-            subprocess.run([f"python3 wildfire.py -S 10.0.0.211 -P 8000 -p 10.0.0.211 -b '{blacklist}' -t 360 --start --scan"], shell=True)
+            subprocess.run([f"python3 wildfire.py -S {args.server} -P {args.port} -b '{blacklist}' -t 360 --start --scan"], shell=True)
         domains.remove(random_domain)
 
 def initialize():

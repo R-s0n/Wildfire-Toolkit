@@ -433,8 +433,6 @@
 *.sbgservices.com
 *.bonne-terre-data-layer.com
 *.skybettingandgaming.com
-*.bingoservices.io
-*.casinoservices.io
 *.msgsvc.io
 *.operationstechnology.io
 *.securityservices.io
@@ -700,6 +698,8 @@
 *.pantherlabs.club
 *.hubspot.com
 *.mtnfootball.com
+*.envstage.com
+*.envdevel.com
 *.companyhub.com
 *.exodus.io
 *.a.exodus.io
@@ -1084,6 +1084,24 @@
 *.nominet.org.uk
 *.nic.uk
 *.lacework.net
+*.AMERICA.GOV
+*.DEVTESTFAN1.GOV
+*.FAN.GOV
+*.FSGB.GOV
+*.IAWG.GOV
+*.IBWC.GOV
+*.OSAC.GOV
+*.PEPFAR.GOV
+*.PREPRODFAN.GOV
+*.SECURITYTESTFAN.GOV
+*.SUPPORTFAN.GOV
+*.USCONSULATE.GOV
+*.USDOSCLOUD.GOV
+*.USEMBASSY.GOV
+*.USMISSION.GOV
+*.ELGUARDIA.NET
+*.FOREIGNASSISTANCE.GOV
+*.USASEANCONNECT.GOV
 *.krisp.ai
 *.feature-test.*.krisp.ai
 *.mdev.krisp.ai
@@ -1234,3 +1252,4 @@
 *.mint.com
 *.quickbooks.com
 *.mailchimp.com
+*.onezerobank.com

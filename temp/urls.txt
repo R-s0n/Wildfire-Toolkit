@@ -464,6 +464,7 @@ klassereise.checkfelix.com
 kayak.com
 kayak.com
 kayak.com
+affiliates.kayak.com
 moneybird.com
 moneybirdstorage.com
 www.mapbox.com
@@ -2439,6 +2440,19 @@ stripo.email
 app.overloop.com
 app.copper.com
 www.copper.com
+www.engelvoelkers.com
+login.engelvoelkers.com
+www.engelvoelkers.com
+www.engelvoelkers.com
+www.engelvoelkers.com
+filewave.engelvoelkers.com
+t-box.engelvoelkers.com
+www.engelvoelkers.com
+www.engelvoelkers.com
+master-data-service.engelvoelkers.com
+leadhub.engelvoelkers.com
+engelvoelkers.tech
+www.go3.engelvoelkers.com
 api.thnks.com
 app.thnks.com
 www.topcoder.com
@@ -4353,6 +4367,7 @@ upchieve.org
 www.lacework.com
 support.lacework.com
 status.lacework.net
+*STATE.GOV
 www.myetherwallet.com
 krisp.ai
 account.krisp.ai
