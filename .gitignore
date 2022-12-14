@@ -4,6 +4,7 @@ bin/package.json
 __pycache__/
 wordlists/tls-results.json
 wordlists/tls-filtered.tmp
+temp/**
 config/**
 reports/**
 temp/**

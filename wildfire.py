@@ -40,6 +40,8 @@ def start(args):
             print(f"[-] Running Fire-Starter Modules (Subdomain Recon) against {seed}")
             if args.deep:
                 subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy} --deep'], shell=True)
+            if args.timeout:
+                subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy} -t {args.timeout}'], shell=True)
             else:
                 subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy}'], shell=True)
         else:
@@ -54,7 +56,8 @@ def spread(args):
         if fqdn['fqdn'] not in args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Fire-Spreader Modules (Server/Port Recon) against {seed}")
-            subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+            subprocess.run([f'python3 toolkit/fire-spreader.py -d {seed} -s {args.server} -p {args.port}'], shell=True)            
+            # subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
             subprocess.run([f'python3 toolkit/wind.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
@@ -70,7 +73,11 @@ def scan(args):
             print(f"[-] Running Drifting-Embers Modules (Vuln Scanning) against {seed}")
             subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t ~/nuclei-templates'], shell=True)
             subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+<<<<<<< HEAD
             # subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
+=======
+            subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
+>>>>>>> b762842f3e7e4d00d396b6903022b7a392a60530
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
@@ -83,8 +90,8 @@ def enum(args):
         if fqdn['fqdn'] not in args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Enumeration Modules against {seed}")
-            subprocess.run([f'python3 toolkit/ignite.py -d {seed} -s {args.server} -p {args.port} -P {args.proxy} -t'], shell=True)
-            # subprocess.run([f'python3 toolkit/engulf.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+            subprocess.run([f'python3 toolkit/ignite.py -d {seed} -s {args.server} -p {args.port} -P {args.proxy}'], shell=True)
+            subprocess.run([f'python3 toolkit/engulf.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
@@ -110,10 +117,14 @@ def arg_parse():
     parser.add_argument('--scan', help='Run Vuln Scan Modules', required=False, action='store_true')
     parser.add_argument('--enum', help='Run Enumeration Modules', required=False, action='store_true')
     parser.add_argument('--deep', help='Crawl all live servers for subdomains', required=False, action='store_true')
+    parser.add_argument('-t','--timeout', help='Adds a timeout check after each module (in minutes)', required=False)
     return parser.parse_args()
 
 def main(args):
-    args = build_blacklist(args)
+    if (args.blacklist):
+        args = build_blacklist(args)
+    else:
+        args.blacklist = ""
     wildfire_timer = Timer()
     if args.start is True and args.spread is True:
         start(args)

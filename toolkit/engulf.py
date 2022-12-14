@@ -45,8 +45,8 @@ def run_arjun_get(args, sorted_endpoints, url):
                 thisEndpoint = "/"
             target = url + thisEndpoint
             print(f"[-] Scanning {target} for hidden parameters...")
-            subprocess.run([f"arjun -u {target}  -oJ ../temp/arjun-test.tmp -oT arjun-text.txt -w ../wordlists/params.txt -oB {args.proxy}:8080"], shell=True)
-            with open('../temp/arjun-test.tmp') as json_file:
+            subprocess.run([f"arjun -u {target}  -oJ temp/arjun-test.tmp -oT arjun-text.txt -w wordlists/params.txt -oB {args.proxy}:8080"], shell=True)
+            with open('temp/arjun-test.tmp') as json_file:
                 data = json.load(json_file)
             print(f"[+] Scan complete!")
             if target not in data:
@@ -85,8 +85,8 @@ def run_arjun_post(args, sorted_endpoints, url):
                 thisEndpoint = "/"
             target = url + thisEndpoint
             print(f"[-] Scanning {target} for hidden parameters...")
-            subprocess.run([f"arjun -u {target}  -oJ ../temp/arjun-test.tmp -oT arjun-text.txt -w ../wordlists/params.txt -oB {args.proxy}:8080 -q -m POST"], shell=True)
-            with open('../temp/arjun-test.tmp') as json_file:
+            subprocess.run([f"arjun -u {target}  -oJ temp/arjun-test.tmp -oT arjun-text.txt -w wordlists/params.txt -oB {args.proxy}:8080 -q -m POST"], shell=True)
+            with open('temp/arjun-test.tmp') as json_file:
                 data = json.load(json_file)
             print(f"[+] Scan complete!")
             if target not in data:
@@ -125,8 +125,8 @@ def run_arjun_json(args, sorted_endpoints, url):
                 thisEndpoint = "/"
             target = url + thisEndpoint
             print(f"[-] Scanning {target} for hidden parameters...")
-            subprocess.run([f"arjun -u {target}  -oJ ../temp/arjun-test.tmp -oT arjun-text.txt -w ../wordlists/params.txt -oB {args.proxy}:8080 -q -m JSON"], shell=True)
-            with open('../temp/arjun-test.tmp') as json_file:
+            subprocess.run([f"arjun -u {target}  -oJ temp/arjun-test.tmp -oT arjun-text.txt -w wordlists/params.txt -oB {args.proxy}:8080 -q -m JSON"], shell=True)
+            with open('temp/arjun-test.tmp') as json_file:
                 data = json.load(json_file)
             print(f"[+] Scan complete!")
             if target not in data:

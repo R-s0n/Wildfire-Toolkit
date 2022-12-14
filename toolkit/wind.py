@@ -78,13 +78,13 @@ else:
     cloning = subprocess.run([f"mkdir {home_dir}/Reports"], stdout=subprocess.DEVNULL, shell=True)
     print("[+] Reports directory successfully created")
 
-#  eyewitness_check = httprobe_check = subprocess.run([f"ls {home_dir}/Tools/EyeWitness"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
-#  if httprobe_check.returncode == 0:
-#      print("[+] EyeWitness is already installed")
-#  else :
-#      print("[!] EyeWitness is NOT already installed -- Installing now...")
-#      cloning = subprocess.run([f"cd {home_dir}/Tools; git clone https://github.com/FortyNorthSecurity/EyeWitness.git;  cd EyeWitness/Python/setup/;  sudo ./setup.sh"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
-#      print("[+] EyeWitness successfully installed!")
+eyewitness_check = httprobe_check = subprocess.run([f"ls {home_dir}/Tools/EyeWitness"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
+if httprobe_check.returncode == 0:
+    print("[+] EyeWitness is already installed")
+else :
+    print("[!] EyeWitness is NOT already installed -- Installing now...")
+    cloning = subprocess.run([f"cd {home_dir}/Tools; git clone https://github.com/FortyNorthSecurity/EyeWitness.git;  cd EyeWitness/Python/setup/;  sudo ./setup.sh"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
+    print("[+] EyeWitness successfully installed!")
 
 server_string = ""
 for server in final_arr:
@@ -93,9 +93,9 @@ f = open("/tmp/httprobe_masscan_results.tmp", "w")
 f.write(server_string)
 f.close()
 now = datetime.now().strftime("%d-%m-%y_%I%p")
-#  print(f"[-] Running EyeWitness report against {fqdn} httprobe results...")
-#  subprocess.run([f"cd {home_dir}/Tools/EyeWitness/Python; ./EyeWitness.py -f /tmp/httprobe_masscan_results.tmp -d {home_dir}/Reports/EyeWitness_wind_{fqdn}_{now} --no-prompt --jitter 5 --timeout 10"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
-#  print(f"[+] EyeWitness report complete!")
+print(f"[-] Running EyeWitness report against {fqdn} httprobe results...")
+subprocess.run([f"cd {home_dir}/Tools/EyeWitness/Python; ./EyeWitness.py -f /tmp/httprobe_masscan_results.tmp -d {home_dir}/Reports/EyeWitness_wind_{fqdn}_{now} --no-prompt --jitter 5 --timeout 10"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
+print(f"[+] EyeWitness report complete!")
 
 end = time.time()
 runtime_seconds = math.floor(end - start)

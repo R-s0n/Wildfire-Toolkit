@@ -75,7 +75,7 @@ if updateMode:
     print(f"[+] Successfully completed the tls-scan!")
 
 print(f"[-] Using jq to parse for the FQDN...")
-subprocess.run([f"""cat /tmp/tls-results.json | jq --slurp -r '.[]? | select(.certificateChain[]?.subject | test("\\\{fqdn}\\\W")) | .ip | @text' > /tmp/tls_filtered.tmp"""], shell=True)
+subprocess.run([f"""cat /tmp/tls-results.json | jq --slurp -r '.[]? | select(.certificateChain[]?.subject | test("{fqdn}")) | .ip | @text' > /tmp/tls_filtered.tmp"""], shell=True)
 print(f"[+] Successfully parsed tls-scan results!")
 now = datetime.now().strftime("%d-%m-%y_%I%p")
 results_str = subprocess.run([f"cat /tmp/tls_filtered.tmp"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)

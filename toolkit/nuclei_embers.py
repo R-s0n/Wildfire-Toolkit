@@ -14,7 +14,7 @@ home_dir = get_home_dir.stdout.replace("\n", "")
 
 blacklist = ['token-spray/','iot/',"/technologies/fingerprinthub-web-fingerprints.yaml",
             'misconfiguration/http-missing-security-headers.yaml',
-            'helpers/','fuzzing/',]
+            'helpers/','fuzzing/','/ssl/mismatched-ssl.yaml','vulnerabilities/generic/request-based-interaction.yaml']
 
 for template in blacklist:
     subprocess.run([f"rm -rf {home_dir}/nuclei-templates/{template}"], shell=True)
