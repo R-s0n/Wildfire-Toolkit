@@ -40,6 +40,8 @@ def start(args):
             print(f"[-] Running Fire-Starter Modules (Subdomain Recon) against {seed}")
             if args.deep:
                 subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy} --deep'], shell=True)
+            if args.timeout:
+                subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy} -t {args.timeout}'], shell=True)
             else:
                 subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy}'], shell=True)
         else:
@@ -111,10 +113,14 @@ def arg_parse():
     parser.add_argument('--scan', help='Run Vuln Scan Modules', required=False, action='store_true')
     parser.add_argument('--enum', help='Run Enumeration Modules', required=False, action='store_true')
     parser.add_argument('--deep', help='Crawl all live servers for subdomains', required=False, action='store_true')
+    parser.add_argument('-t','--timeout', help='Adds a timeout check after each module (in minutes)', required=False)
     return parser.parse_args()
 
 def main(args):
-    args = build_blacklist(args)
+    if (args.blacklist):
+        args = build_blacklist(args)
+    else:
+        args.blacklist = ""
     wildfire_timer = Timer()
     if args.start is True and args.spread is True:
         start(args)

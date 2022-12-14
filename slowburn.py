@@ -3,6 +3,8 @@ import subprocess
 import base64
 import argparse
 import re
+import random
+import json
 from bs4 import BeautifulSoup
 from datetime import datetime
 from time import sleep
@@ -233,6 +235,52 @@ def bugcrowd():
             get_bugcrowd_scope(program_link)
     return True
 
+def get_url_list():
+    f = open('temp/urls.txt','r')
+    lines = f.readlines()
+    urls = []
+    for line in lines:
+        urls.append(line.strip())
+    return urls
+
+def get_domain_list():
+    f = open('temp/domains.txt','r')
+    lines = f.readlines()
+    domains = []
+    for line in lines:
+        domains.append(line.strip()[2:])
+    return domains
+
+def add_domain(domain, args):
+    requests.post(f"http://{args.server}:{args.port}/api/fqdn/new", json={"fqdn":domain})
+
+def get_random_domain(domains):
+    return random.choice(domains)
+
+def get_fqdns(args):
+    res = requests.post(f"http://{args.server}:{args.port}/api/fqdn/all")
+    return res
+
+def get_current_domains(fqdns):
+    current_domain_list = []
+    for fqdn in fqdns:
+        current_domain_list.append(fqdn['fqdn'])
+    return current_domain_list
+
+def slowburn_domains(args, domains):
+    while len(domains) > 0:
+        res = get_fqdns(args)
+        fqdn_json = json.loads(res.text)
+        current_domain_list = get_current_domains(fqdn_json)
+        random_domain = get_random_domain(domains)
+        blacklist = ""
+        for domain in current_domain_list:
+            blacklist += f"{domain},"
+        if random_domain not in current_domain_list:
+            add_domain(random_domain, args)
+            subprocess.run([f"python3 wildfire.py -S 10.0.0.211 -P 8000 -p 10.0.0.211 -b '{blacklist}' -t 360 --start --scan"], shell=True)
+        domains.remove(random_domain)
+
 def initialize():
     hackerone()
     bugcrowd()
@@ -246,7 +294,14 @@ def arg_parse():
     return parser.parse_args()
 
 def main(args):
-    initialize()
+    # initialize()
+
+    urls = get_url_list()
+    domains = get_domain_list()
+    domain_count = len(domains)
+    url_count = len(urls)
+    print(f"[+] Data Initialized!\n[+] Domain Count: {domain_count} - URL Count: {url_count}")
+    slowburn_domains(args, domains)
     print("[+] Done!")
 
 if __name__ == "__main__":

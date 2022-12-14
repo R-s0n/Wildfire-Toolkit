@@ -54,7 +54,7 @@ import requests
 import subprocess
 import argparse
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class Timer:
     def __init__(self):
@@ -511,12 +511,26 @@ def populate_burp(args, thisFqdn):
     subprocess.run([f"ffuf -u 'FUZZ' -w /tmp/populate_burp.tmp -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36' -replay-proxy 'http://{args.proxy}:8080'"], shell=True)
     subprocess.run([f"rm /tmp/populate_burp.tmp"], shell=True)
 
+def check_timeout(args, timer):
+    start_time = timer.start
+    timeout_minutes = int(args.timeout)
+    start_time += timedelta(minutes=timeout_minutes)
+    timeout = start_time
+    now = datetime.now()
+    if now > timeout:
+        print("[!] Current scan time has exceeded the timeout threshold!  Exiting Fire Starter Module...")
+        exit()
+    else:
+        time_left = timeout - now
+        print(F"[+] Time remaining before timeout threshold: {time_left}")
+
 def arg_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('-S','--server', help='IP Address of MongoDB API', required=True)
     parser.add_argument('-P','--port', help='Port of MongoDB API', required=True)
     parser.add_argument('-p','--proxy', help='IP Address of Burp Suite Proxy', required=False)
     parser.add_argument('-d','--fqdn', help='Name of the Root/Seed FQDN', required=True)
+    parser.add_argument('-t','--timeout', help='Adds a timeout check after each module (in minutes)', required=False)
     parser.add_argument('--deep', help='Crawl all live servers for subdomains', required=False, action='store_true')
     parser.add_argument('-u', '--update', help='Update AWS IP Certificate Data ( Can Take 48+ Hours! )', required=False, action='store_true')
     return parser.parse_args()
@@ -525,15 +539,45 @@ def main(args):
     starter_timer = Timer()
     print("[-] Running Subdomain Scraping Modules...")
     sublist3r(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     amass(args, get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     assetfinder(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     gau(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     crt(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     shosubgo(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     subfinder(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     subfinder_recursive(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     build_cewl_wordlist(args)
     shuffle_dns_custom(args, get_home_dir(), get_fqdn_obj(args))
     consolidate(args)
@@ -544,6 +588,9 @@ def main(args):
          gospider_deep(get_home_dir(), get_fqdn_obj(args))
     else:
          gospider(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     subdomainizer(get_home_dir(), get_fqdn_obj(args))
     if not check_clear_sky_data():
         if not args.update:
