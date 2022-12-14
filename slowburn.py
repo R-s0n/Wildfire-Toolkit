@@ -295,7 +295,6 @@ def arg_parse():
 
 def main(args):
     # initialize()
-
     urls = get_url_list()
     domains = get_domain_list()
     domain_count = len(domains)

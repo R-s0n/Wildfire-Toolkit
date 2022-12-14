@@ -54,7 +54,7 @@ import requests
 import subprocess
 import argparse
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class Timer:
     def __init__(self):
@@ -82,12 +82,53 @@ def sublist3r(args, home_dir, thisFqdn):
     except Exception as e:
         print(f"[!] Something went wrong!  Exception: {str(e)}")
 
+def remove_duplicate_ips(ip_list):
+    try:
+        clean_ip_list = []
+        for ip in ip_list:
+            if ip in clean_ip_list:
+                continue
+            clean_ip_list.append(ip)            
+        return clean_ip_list
+    except Exception as e:
+        print(f"[!] Something went wrong!  Exception: {str(e)}")
+
+def get_ips_from_amass(thisFqdn):
+    try:
+        amass_file = open(f"/tmp/amass.tmp", 'r')
+        amass_file_lines = amass_file.readlines()
+        amass_file.close()
+        ip_list = []
+        for line in amass_file_lines:
+            ip_string = line.strip().split(" ")[1]
+            if "," in ip_string:
+                new_ip_list = ip_string.split(",")
+                for ip in new_ip_list:
+                    if len(ip) > 4:
+                        ip_obj = {
+                            "ip": ip,
+                            "ports": []
+                        }
+                        ip_list.append(ip_obj)
+            else:
+                ip_obj = {
+                    "ip": ip_string,
+                    "ports": []
+                }
+                ip_list.append(ip_obj)
+        clean_ip_list = remove_duplicate_ips(ip_list)
+        thisFqdn['ips'] = clean_ip_list
+        return thisFqdn  
+    except Exception as e:
+        print(f"[!] Something went wrong!  Exception: {str(e)}")
+
 def amass(args, thisFqdn):
     try:
         regex = "{1,3}"
-        subprocess.run([f"amass enum -src -ip -brute -min-for-recursive 2 -timeout 60 -d {args.fqdn} -o /tmp/amass.tmp"], shell=True)
+        subprocess.run([f"amass enum -src -ip -brute -ipv4 -min-for-recursive 2 -timeout 60 -d {args.fqdn} -o /tmp/amass.tmp"], shell=True)
         subprocess.run([f"cp /tmp/amass.tmp /tmp/amass.full.tmp"], stdout=subprocess.DEVNULL, shell=True)
         subprocess.run([f"sed -i -E 's/\[(.*?)\] +//g' /tmp/amass.tmp"], stdout=subprocess.DEVNULL, shell=True)
+        thisFqdn = get_ips_from_amass(thisFqdn)
         subprocess.run([f"sed -i -E 's/ ([0-9]{regex}\.)[0-9].*//g' /tmp/amass.tmp"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         amass_file = open(f"/tmp/amass.tmp", 'r')
         amass_file_lines = amass_file.readlines()
@@ -125,7 +166,7 @@ def assetfinder(args, home_dir, thisFqdn):
 
 def gau(args, home_dir, thisFqdn):
     try:
-        subprocess.run([f"{home_dir}/go/bin/gau -subs {args.fqdn} | cut -d / -f 3 | sort -u > /tmp/gau.tmp"], shell=True)
+        subprocess.run([f"{home_dir}/go/bin/gau --subs {args.fqdn} | cut -d / -f 3 | sort -u > /tmp/gau.tmp"], shell=True)
         f = open(f"/tmp/gau.tmp", "r")
         gau_arr = f.read().rstrip().split("\n")
         f.close()
@@ -330,6 +371,9 @@ def httprobe(args, home_dir, thisFqdn):
     r = requests.post(f'http://{args.server}:{args.port}/api/auto', data={'fqdn':args.fqdn})
     thisFqdn = r.json()
     httprobe = httprobe_results.stdout.split("\n")
+    for item in httprobe:
+        if len(item) < 2:
+            httprobe.remove(item)
     previous_httprobe = thisFqdn['recon']['subdomains']['httprobe']
     httprobeAdded = []
     httprobeRemoved = []
@@ -407,9 +451,9 @@ def check_clear_sky_data():
         return False
 
 def search_data(args, thisFqdn):
-    subprocess.run([f"""cat wordlists/tls-results.json | jq --slurp -r '.[]? | select(.certificateChain[]?.subject | test("\\\{args.fqdn}\\\W")) | .ip | @text' > wordlists/tls_filtered.tmp"""], shell=True)
+    subprocess.run([f"""cat wordlists/tls-results.json | jq --slurp -r '.[]? | select(.certificateChain[]?.subject | test("{args.fqdn}")) | .ip | @text' > wordlists/tls_filtered.tmp"""], shell=True)
     results_str = subprocess.run([f"cat wordlists/tls_filtered.tmp"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-    results_arr = results_str.stdout.split("\n")
+    results_arr = results_str.stdout.split("\n").pop()
     # if len(results_arr) < 10:
     #     subprocess.run([f"sudo nmap -T 4 -iL wordlists/tls_filtered.tmp -Pn --script=http-title -p- --open -oN reports/Clear-Sky_{args.search}_{now}"], shell=True)
     # else:
@@ -467,12 +511,26 @@ def populate_burp(args, thisFqdn):
     subprocess.run([f"ffuf -u 'FUZZ' -w /tmp/populate_burp.tmp -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36' -replay-proxy 'http://{args.proxy}:8080'"], shell=True)
     subprocess.run([f"rm /tmp/populate_burp.tmp"], shell=True)
 
+def check_timeout(args, timer):
+    start_time = timer.start
+    timeout_minutes = int(args.timeout)
+    start_time += timedelta(minutes=timeout_minutes)
+    timeout = start_time
+    now = datetime.now()
+    if now > timeout:
+        print("[!] Current scan time has exceeded the timeout threshold!  Exiting Fire Starter Module...")
+        exit()
+    else:
+        time_left = timeout - now
+        print(F"[+] Time remaining before timeout threshold: {time_left}")
+
 def arg_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('-S','--server', help='IP Address of MongoDB API', required=True)
     parser.add_argument('-P','--port', help='Port of MongoDB API', required=True)
     parser.add_argument('-p','--proxy', help='IP Address of Burp Suite Proxy', required=False)
     parser.add_argument('-d','--fqdn', help='Name of the Root/Seed FQDN', required=True)
+    parser.add_argument('-t','--timeout', help='Adds a timeout check after each module (in minutes)', required=False)
     parser.add_argument('--deep', help='Crawl all live servers for subdomains', required=False, action='store_true')
     parser.add_argument('-u', '--update', help='Update AWS IP Certificate Data ( Can Take 48+ Hours! )', required=False, action='store_true')
     return parser.parse_args()
@@ -481,15 +539,45 @@ def main(args):
     starter_timer = Timer()
     print("[-] Running Subdomain Scraping Modules...")
     sublist3r(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     amass(args, get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     assetfinder(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     gau(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     crt(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     shosubgo(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     subfinder(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     subfinder_recursive(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     build_cewl_wordlist(args)
     shuffle_dns_custom(args, get_home_dir(), get_fqdn_obj(args))
     consolidate(args)
@@ -500,6 +588,9 @@ def main(args):
          gospider_deep(get_home_dir(), get_fqdn_obj(args))
     else:
          gospider(args, get_home_dir(), get_fqdn_obj(args))
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
     subdomainizer(get_home_dir(), get_fqdn_obj(args))
     if not check_clear_sky_data():
         if not args.update:
