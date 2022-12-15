@@ -39,11 +39,20 @@ def start(args):
             seed = fqdn['fqdn']
             print(f"[-] Running Fire-Starter Modules (Subdomain Recon) against {seed}")
             if args.deep:
-                subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy} --deep'], shell=True)
+                try:
+                    subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy} --deep'], shell=True)
+                except Exception as e:
+                    print(f"[!] Exception: {e}")
             if args.timeout:
-                subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy} -t {args.timeout}'], shell=True)
+                try:
+                    subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy} -t {args.timeout}'], shell=True)
+                except Exception as e:
+                    print(f"[!] Exception: {e}")
             else:
-                subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy}'], shell=True)
+                try:
+                    subprocess.run([f'python3 toolkit/fire-starter.py -d {seed} -S {args.server} -P {args.port} -p {args.proxy}'], shell=True)
+                except Exception as e:
+                    print(f"[!] Exception: {e}")
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
@@ -56,9 +65,18 @@ def spread(args):
         if fqdn['fqdn'] not in args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Fire-Spreader Modules (Server/Port Recon) against {seed}")
-            subprocess.run([f'python3 toolkit/fire-spreader.py -d {seed} -s {args.server} -p {args.port}'], shell=True)            
-            # subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
-            subprocess.run([f'python3 toolkit/wind.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+            try:
+                subprocess.run([f'python3 toolkit/fire-spreader.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+            except Exception as e:
+                    print(f"[!] Exception: {e}")
+            # try:        
+            #     subprocess.run([f'python3 toolkit/firewood.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+            # except Exception as e:
+            #         print(f"[!] Exception: {e}")
+            try:
+                subprocess.run([f'python3 toolkit/wind.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+            except Exception as e:
+                    print(f"[!] Exception: {e}")
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
@@ -71,9 +89,18 @@ def scan(args):
         if fqdn['fqdn'] not in args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Drifting-Embers Modules (Vuln Scanning) against {seed}")
-            subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t ~/nuclei-templates'], shell=True)
-            subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
-            subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
+            try:
+                subprocess.run([f'python3 toolkit/nuclei_embers.py -d {seed} -s {args.server} -p {args.port} -t ~/nuclei-templates'], shell=True)
+            except Exception as e:
+                    print(f"[!] Exception: {e}")
+            try:
+                subprocess.run([f'python3 toolkit/proto_pollution_embers.py -d {seed} -s {args.server} -p {args.port} -T 2'], shell=True)
+            except Exception as e:
+                    print(f"[!] Exception: {e}")
+            try:
+                subprocess.run([f'python3 toolkit/cve_embers.py -D {seed} -S {args.server} -P {args.port} -j -d 1'], shell=True)
+            except Exception as e:
+                    print(f"[!] Exception: {e}")
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True
@@ -86,8 +113,14 @@ def enum(args):
         if fqdn['fqdn'] not in args.blacklist:
             seed = fqdn['fqdn']
             print(f"[-] Running Enumeration Modules against {seed}")
-            subprocess.run([f'python3 toolkit/ignite.py -d {seed} -s {args.server} -p {args.port} -P {args.proxy}'], shell=True)
-            subprocess.run([f'python3 toolkit/engulf.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+            try:
+                subprocess.run([f'python3 toolkit/ignite.py -d {seed} -s {args.server} -p {args.port} -P {args.proxy}'], shell=True)
+            except Exception as e:
+                    print(f"[!] Exception: {e}")
+            try:
+                subprocess.run([f'python3 toolkit/engulf.py -d {seed} -s {args.server} -p {args.port}'], shell=True)
+            except Exception as e:
+                    print(f"[!] Exception: {e}")
         else:
             print(f"[!] {fqdn['fqdn']} has been blacklisted for this round of scanning.  Skipping...")
     return True

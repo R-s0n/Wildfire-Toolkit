@@ -538,60 +538,102 @@ def arg_parse():
 def main(args):
     starter_timer = Timer()
     print("[-] Running Subdomain Scraping Modules...")
-    sublist3r(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        sublist3r(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    amass(args, get_fqdn_obj(args))
+    try:
+        amass(args, get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    assetfinder(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        assetfinder(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    gau(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        gau(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    crt(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        crt(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    shosubgo(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        shosubgo(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    subfinder(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        subfinder(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    subfinder_recursive(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        subfinder_recursive(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    build_cewl_wordlist(args)
-    shuffle_dns_custom(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        build_cewl_wordlist(args)
+        shuffle_dns_custom(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     consolidate(args)
     httprobe(args, get_home_dir(), get_fqdn_obj(args))
     build_crawl_list(get_fqdn_obj(args))
     if args.deep:
-         print(f"[-] Running DEEP Crawl Scan on {args.fqdn}...")
-         gospider_deep(get_home_dir(), get_fqdn_obj(args))
+        print(f"[-] Running DEEP Crawl Scan on {args.fqdn}...")
+        try:
+            gospider_deep(get_home_dir(), get_fqdn_obj(args))
+        except Exception as e:
+            print(f"[!] Exception: {e}")
     else:
-         gospider(args, get_home_dir(), get_fqdn_obj(args))
+        try:
+            gospider(args, get_home_dir(), get_fqdn_obj(args))
+        except Exception as e:
+            print(f"[!] Exception: {e}")
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
-    subdomainizer(get_home_dir(), get_fqdn_obj(args))
+    try:
+        subdomainizer(get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     if not check_clear_sky_data():
         if not args.update:
             print("[!] Clear Sky data not found!  Skipping AWS IP range scan...")
@@ -603,7 +645,10 @@ def main(args):
     new_subdomain_length = get_new_subdomain_length(args)
     slack_text = f'The subdomain list for {args.fqdn} has been updated with {new_subdomain_length} new subdomains!'
     send_slack_notification(get_home_dir(), slack_text)
-    httprobe(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        httprobe(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     populate_burp(args, get_fqdn_obj(args))
     send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args)))
     remove_wordlists()

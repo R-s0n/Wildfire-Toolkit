@@ -158,21 +158,32 @@ def hackerone():
     print(f"[+] Programs Discovered: {program_count}")
     url_list = []
     domain_list = []
+    with open('h1.json','w') as f:
+        f.write("[")
     for program in program_list:
         print(f"[-] Checking {program} scope for URLs or Domains..")
-        program_data = get_h1_domains(program)
+        try:
+            program_data = get_h1_domains(program)
+        except Exception as e:
+            print(f"[!] Exception: {Exception}\n[!] Failed to retreive data for {program}!  Skipping...")
+            continue
+        with open('h1.json','a') as f:
+            f.write(json.dumps(program_data, indent=4) + ",")
         if program_data['relationships']['structured_scopes']:
             for scope_item in program_data['relationships']['structured_scopes']['data']:
                 if scope_item['attributes']['asset_type'] == 'URL':
                     clean_url = scope_item['attributes']['asset_identifier'].replace("https://","").replace("http://","")
-                    if clean_url[:2] == "*.":
+                    if clean_url[:2] == "*." and scope_item['attributes']['eligible_for_submission'] is True:
                         domain_list.append(clean_url)
                         print("Domain: " + clean_url)
                     else:
-                        url_list.append(clean_url)
-                        print("URL: " + clean_url)
+                        if scope_item['attributes']['eligible_for_submission'] is True:
+                            url_list.append(clean_url)
+                            print("URL: " + clean_url)
         else:
             print(f"[!] No structured scope key:\n{program_data['relationships']}")
+    with open('h1.json','a') as f:
+        f.write("{}]")
     write_output(url_list, 'urls')
     write_output(domain_list, 'domains')
 
