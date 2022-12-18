@@ -12,8 +12,6 @@ long_options = ["domain=","server=","port=","template="]
 get_home_dir = subprocess.run(["echo $HOME"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
 home_dir = get_home_dir.stdout.replace("\n", "")
 
-subprocess.run(['export PATH="$HOME/go/bin:$PATH";~/go/bin/nuclei -update;~/go/bin/nuclei -ut'])
-
 # blacklist = ['token-spray/','iot/',"/technologies/fingerprinthub-web-fingerprints.yaml",
 #             'misconfiguration/http-missing-security-headers.yaml',
 #             'helpers/','fuzzing/','/ssl/mismatched-ssl.yaml','vulnerabilities/generic/request-based-interaction.yaml']
@@ -53,6 +51,8 @@ if hasDomain is False or hasServer is False or hasPort is False or hasTemplate i
 
 get_home_dir = subprocess.run(["echo $HOME"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
 home_dir = get_home_dir.stdout.replace("\n", "")
+
+subprocess.run([f'export PATH="$HOME/go/bin:$PATH"; {home_dir}/go/bin/nuclei -update -ut;'], shell=True)
 
 now_start = datetime.now().strftime("%d-%m-%y_%I%p")
 
