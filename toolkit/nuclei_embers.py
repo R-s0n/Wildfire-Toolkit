@@ -12,9 +12,13 @@ long_options = ["domain=","server=","port=","template="]
 get_home_dir = subprocess.run(["echo $HOME"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, shell=True)
 home_dir = get_home_dir.stdout.replace("\n", "")
 
-blacklist = ['token-spray/','iot/',"/technologies/fingerprinthub-web-fingerprints.yaml",
-            'misconfiguration/http-missing-security-headers.yaml',
-            'helpers/','fuzzing/','/ssl/mismatched-ssl.yaml','vulnerabilities/generic/request-based-interaction.yaml']
+subprocess.run(['export PATH="$HOME/go/bin:$PATH";~/go/bin/nuclei -update;~/go/bin/nuclei -ut'])
+
+# blacklist = ['token-spray/','iot/',"/technologies/fingerprinthub-web-fingerprints.yaml",
+#             'misconfiguration/http-missing-security-headers.yaml',
+#             'helpers/','fuzzing/','/ssl/mismatched-ssl.yaml','vulnerabilities/generic/request-based-interaction.yaml']
+
+blacklist = []
 
 for template in blacklist:
     subprocess.run([f"rm -rf {home_dir}/nuclei-templates/{template}"], shell=True)
@@ -72,7 +76,7 @@ f.close()
 
 now = datetime.now().strftime("%d-%m-%y_%I%p")
 
-subprocess.run([f"{home_dir}/go/bin/nuclei -t {template} -l /tmp/urls.txt -o /tmp/{fqdn}-{now}.json -json"], shell=True)
+subprocess.run([f"{home_dir}/go/bin/nuclei -t {template} -l /tmp/urls.txt -sa -as -es info -fhr -passive -headless -o /tmp/{fqdn}-{now}.json -json"], shell=True)
 
 f = open(f"/tmp/{fqdn}-{now}.json")
 results = f.read().split("\n")
