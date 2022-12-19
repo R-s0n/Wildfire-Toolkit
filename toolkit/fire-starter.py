@@ -492,10 +492,18 @@ def remove_wordlists():
     subprocess.run(["rm wordlists/cewl_*"], shell=True)
     subprocess.run(["rm wordlists/live_*"], shell=True)
 
-def get_live_server_text(args, thisFqdn):
+def get_live_server_text(args, thisFqdn, first=True):
+    if first:
+        context_str = "Starting second round of recon..."
+    else:
+        context_str = "Happy Hunting :)"
     length = len(thisFqdn['recon']['subdomains']['httprobeAdded'])
     if length > 10:
-        return f'This scan of {args.fqdn} discovered that {length} URLs went live since the last scan!\nHappy Hunting :)'
+        return f'This scan of {args.fqdn} discovered that {length} URLs went live since the last scan!  {context_str}'
+    elif length < 1:
+        if first:
+            return f'This scan of {args.fqdn} did not find any new live URLs.  Starting second round of recon...'
+        return f'This scan of {args.fqdn} did not find any new live URLs.  Better luck next time :('
     else:
         message_urls_string = ""
         for url in thisFqdn['recon']['subdomains']['httprobeAdded']:
@@ -614,7 +622,11 @@ def main(args):
     except Exception as e:
         print(f"[!] Exception: {e}")
     consolidate(args)
+    new_subdomain_length = get_new_subdomain_length(args)
+    slack_text = f'The subdomain list for {args.fqdn} has been updated with {new_subdomain_length} new subdomains!'
+    send_slack_notification(get_home_dir(), slack_text)
     httprobe(args, get_home_dir(), get_fqdn_obj(args))
+    send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args)))
     build_crawl_list(get_fqdn_obj(args))
     if args.deep:
         print(f"[-] Running DEEP Crawl Scan on {args.fqdn}...")
@@ -650,7 +662,7 @@ def main(args):
     except Exception as e:
         print(f"[!] Exception: {e}")
     populate_burp(args, get_fqdn_obj(args))
-    send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args)))
+    send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args)), False)
     remove_wordlists()
     starter_timer.stop_timer()
     print(f"[+] Done!  Start: {starter_timer.get_start()}  |  Stop: {starter_timer.get_stop()}")
