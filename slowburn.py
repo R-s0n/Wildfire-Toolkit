@@ -278,6 +278,13 @@ def get_current_domains(fqdns):
         current_domain_list.append(fqdn['fqdn'])
     return current_domain_list
 
+def check_vulns(args, domain):
+    res = requests.post(f"http://{args.server}:{args.port}/api/auto", data={"fqdn":domain})
+    thisFqdn = res.json()
+    if len(thisFqdn['vulns']) < 1:
+        print("[!] Nuclei scan returned ZERO impactful results.  Deleting domain...")
+        res = requests.post(f"http://{args.server}:{args.port}/api/fqdn/delete", data={"fqdn":domain})
+
 def slowburn_domains(args, domains):
     while len(domains) > 0:
         res = get_fqdns(args)
@@ -290,6 +297,7 @@ def slowburn_domains(args, domains):
         if random_domain not in current_domain_list:
             add_domain(random_domain, args)
             subprocess.run([f"python3 wildfire.py -S {args.server} -P {args.port} -b '{blacklist}' -t 360 --start --scan"], shell=True)
+            check_vulns(args, domain)
         domains.remove(random_domain)
 
 def initialize():

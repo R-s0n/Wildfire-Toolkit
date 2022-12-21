@@ -493,6 +493,7 @@ def remove_wordlists():
     subprocess.run(["rm wordlists/live_*"], shell=True)
 
 def get_live_server_text(args, thisFqdn, first=True):
+    print("[!] DEBUG: get_live_server_text method reached.")
     if first:
         context_str = "Starting second round of recon..."
     else:
@@ -625,7 +626,10 @@ def main(args):
     new_subdomain_length = get_new_subdomain_length(args)
     slack_text = f'The subdomain list for {args.fqdn} has been updated with {new_subdomain_length} new subdomains!'
     send_slack_notification(get_home_dir(), slack_text)
-    httprobe(args, get_home_dir(), get_fqdn_obj(args))
+    try:
+        httprobe(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
     send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args)))
     build_crawl_list(get_fqdn_obj(args))
     if args.deep:
@@ -661,8 +665,8 @@ def main(args):
         httprobe(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
-    populate_burp(args, get_fqdn_obj(args))
     send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args)), False)
+    populate_burp(args, get_fqdn_obj(args))
     remove_wordlists()
     starter_timer.stop_timer()
     print(f"[+] Done!  Start: {starter_timer.get_start()}  |  Stop: {starter_timer.get_stop()}")
