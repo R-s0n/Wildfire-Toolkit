@@ -492,9 +492,9 @@ def remove_wordlists():
     subprocess.run(["rm wordlists/cewl_*"], shell=True)
     subprocess.run(["rm wordlists/live_*"], shell=True)
 
-def get_live_server_text(args, thisFqdn, first=True):
+def get_live_server_text(args, thisFqdn, first):
     print("[!] DEBUG: get_live_server_text method reached.")
-    if first:
+    if first is True:
         context_str = "Starting second round of recon..."
     else:
         context_str = "Happy Hunting :)"
@@ -630,7 +630,7 @@ def main(args):
         httprobe(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
-    send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args)))
+    send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args), True))
     build_crawl_list(get_fqdn_obj(args))
     if args.deep:
         print(f"[-] Running DEEP Crawl Scan on {args.fqdn}...")
