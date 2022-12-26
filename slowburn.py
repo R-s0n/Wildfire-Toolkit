@@ -297,7 +297,7 @@ def slowburn_domains(args, domains):
         if random_domain not in current_domain_list:
             add_domain(random_domain, args)
             subprocess.run([f"python3 wildfire.py -S {args.server} -P {args.port} -b '{blacklist}' -t 360 --start --scan"], shell=True)
-            check_vulns(args, domain)
+            check_vulns(args, random_domain)
         domains.remove(random_domain)
 
 def initialize():

@@ -665,7 +665,7 @@ def main(args):
         httprobe(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
-    send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args)), False)
+    send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args), False))
     populate_burp(args, get_fqdn_obj(args))
     remove_wordlists()
     starter_timer.stop_timer()
