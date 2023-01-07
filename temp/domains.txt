@@ -15,7 +15,6 @@
 *.twitter.com
 *.vine.co
 *.twimg.com
-*.getrevue.co
 *.hey.com
 *.quip.com
 *.tinder.com
@@ -76,6 +75,7 @@
 *.withbuddies.com
 *.ubnt.com
 *.ui.com
+*.tube8.com
 *.staging-airtableblocks.com
 *.staging.airtable.com
 *.airbnb.com
@@ -309,7 +309,6 @@
 *.smule.com
 *.infra.lifeomic.com
 *.dev.lifeomic.com
-*.tube8.com
 *.bitmex.com
 *.betfair.com
 *.paddypower.com
@@ -789,12 +788,14 @@
 *.PEPFAR.GOV
 *.PREPRODFAN.GOV
 *.SECURITYTESTFAN.GOV
+*.STATE.GOV
 *.SUPPORTFAN.GOV
 *.USCONSULATE.GOV
 *.USDOSCLOUD.GOV
 *.USEMBASSY.GOV
 *.USMISSION.GOV
 *.ELGUARDIA.NET
+*.REWARDSFORJUSTICE.NET
 *.krisp.ai
 *.epam.com
 *.lab.epam.com
@@ -811,6 +812,9 @@
 *.oanda.jp
 *.tms.pl
 *.tmsbrokers.com
+*.moonpaycloud.com
+*.hypermint.com
+*.moonpay.com
 *.veeam.com
 *.kasten.io
 *.veeamgov.com
@@ -905,13 +909,18 @@
 *.otherside.xyz
 *.meebits.app
 *.cryptopunks.app
+*.mdvmm.xyz
 *.rivian.com
 *.rivianservices.com
 *.prod.brazil.tkn.zone
 *.production.tkn.zone
+*.Mckesson.com
+*.covermymeds.com
+*.mckesson.*
 *.intuit.com
 *.turbotax.com
 *.mint.com
 *.quickbooks.com
 *.mailchimp.com
 *.onezerobank.com
+*.superbet.ro

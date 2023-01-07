@@ -283,7 +283,7 @@ def check_vulns(args, domain):
     thisFqdn = res.json()
     if len(thisFqdn['vulns']) < 1:
         print("[!] Nuclei scan returned ZERO impactful results.  Deleting domain...")
-        res = requests.post(f"http://{args.server}:{args.port}/api/fqdn/delete", data={"fqdn":domain})
+        res = requests.post(f"http://{args.server}:{args.port}/api/fqdn/delete", data={"fqdn":thisFqdn})
 
 def slowburn_domains(args, domains):
     while len(domains) > 0:
@@ -296,13 +296,42 @@ def slowburn_domains(args, domains):
             blacklist += f"{domain},"
         if random_domain not in current_domain_list:
             add_domain(random_domain, args)
-            subprocess.run([f"python3 wildfire.py -S {args.server} -P {args.port} -b '{blacklist}' -t 360 --start --scan"], shell=True)
+            # subprocess.run([f"python3 wildfire.py -S {args.server} -P {args.port} -b '{blacklist}' -t 360 --start --scan"], shell=True)
+            firestarter(args, random_domain)
+            firescan(args, random_domain)
             check_vulns(args, random_domain)
         domains.remove(random_domain)
 
 def initialize():
     hackerone()
-    bugcrowd()
+    # bugcrowd()
+
+def firestarter(args, domain):
+    print(f"[-] Running Fire-Starter Modules (Subdomain Recon) against {domain}")
+    try:
+        subprocess.run([f'python3 toolkit/fire-starter.py -d {domain} -S {args.server} -P {args.port} -t 360 --limit'], shell=True)
+    except Exception as e:
+        print(f"[!] Exception: {e}")
+    return True
+
+def firescan(args, domain):
+    print(f"[-] Running Drifting-Embers Modules (Vuln Scanning) against {domain}")
+    try:
+        subprocess.run([f'python3 toolkit/nuclei_embers.py -d {domain} -s {args.server} -p {args.port} -t ~/nuclei-templates'], shell=True)
+    except Exception as e:
+            print(f"[!] Exception: {e}")
+    return True
+
+def sort_fqdns(fqdns):
+    sorted_fqdns = []
+    while len(fqdns) > 0:
+        last_updated = fqdns[0]
+        for fqdn in fqdns:
+            if last_updated['updatedAt'] > fqdn['updatedAt']:
+                last_updated = fqdn
+        fqdns.remove(last_updated)
+        sorted_fqdns.append(last_updated)
+    return sorted_fqdns
 
 def arg_parse():
     parser = argparse.ArgumentParser()

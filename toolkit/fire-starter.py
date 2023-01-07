@@ -520,6 +520,16 @@ def populate_burp(args, thisFqdn):
     subprocess.run([f"ffuf -u 'FUZZ' -w /tmp/populate_burp.tmp -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36' -replay-proxy 'http://{args.proxy}:8080'"], shell=True)
     subprocess.run([f"rm /tmp/populate_burp.tmp"], shell=True)
 
+def check_limit(args):
+    thisFqdn = get_fqdn_obj(args)
+    unique_domain_count = 0
+    for lst in thisFqdn['recon']['subdomains']:
+        unique_domain_count += len(lst)
+    if unique_domain_count > 999 and args.limit:
+        print("[!] Unique subdomain limit reached!  Ending the scan for now, but you can always come back and run the scan again without the -l|--limit flat.")
+        exit()
+    print(f"[+] Current unique subdomain count: {unique_domain_count}\n[+] Continuing scan...")
+
 def check_timeout(args, timer):
     start_time = timer.start
     timeout_minutes = int(args.timeout)
@@ -542,18 +552,12 @@ def arg_parse():
     parser.add_argument('-t','--timeout', help='Adds a timeout check after each module (in minutes)', required=False)
     parser.add_argument('--deep', help='Crawl all live servers for subdomains', required=False, action='store_true')
     parser.add_argument('-u', '--update', help='Update AWS IP Certificate Data ( Can Take 48+ Hours! )', required=False, action='store_true')
+    parser.add_argument('-l', '--limit', help='Stop the scan when the number of unique subdomains goes above 999', required=False, action='store_true')
     return parser.parse_args()
 
 def main(args):
     starter_timer = Timer()
     print("[-] Running Subdomain Scraping Modules...")
-    try:
-        sublist3r(args, get_home_dir(), get_fqdn_obj(args))
-    except Exception as e:
-        print(f"[!] Exception: {e}")
-    if args.timeout:
-        print("[-] Timeout threshold detected.  Checking timer...")
-        check_timeout(args, starter_timer)
     try:
         amass(args, get_fqdn_obj(args))
     except Exception as e:
@@ -561,6 +565,19 @@ def main(args):
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
+    try:
+        sublist3r(args, get_home_dir(), get_fqdn_obj(args))
+    except Exception as e:
+        print(f"[!] Exception: {e}")
+    if args.timeout:
+        print("[-] Timeout threshold detected.  Checking timer...")
+        check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
         assetfinder(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
@@ -568,6 +585,9 @@ def main(args):
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
         gau(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
@@ -575,6 +595,9 @@ def main(args):
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
         crt(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
@@ -582,6 +605,9 @@ def main(args):
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
         shosubgo(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
@@ -589,6 +615,9 @@ def main(args):
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
         subfinder(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
@@ -596,6 +625,9 @@ def main(args):
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
         subfinder_recursive(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
@@ -603,6 +635,9 @@ def main(args):
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
         github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
@@ -610,6 +645,9 @@ def main(args):
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
         shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
@@ -617,6 +655,9 @@ def main(args):
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
         build_cewl_wordlist(args)
         shuffle_dns_custom(args, get_home_dir(), get_fqdn_obj(args))
@@ -632,6 +673,9 @@ def main(args):
         print(f"[!] Exception: {e}")
     send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args), True))
     build_crawl_list(get_fqdn_obj(args))
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     if args.deep:
         print(f"[-] Running DEEP Crawl Scan on {args.fqdn}...")
         try:
@@ -646,6 +690,9 @@ def main(args):
     if args.timeout:
         print("[-] Timeout threshold detected.  Checking timer...")
         check_timeout(args, starter_timer)
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
         subdomainizer(get_home_dir(), get_fqdn_obj(args))
     except Exception as e:

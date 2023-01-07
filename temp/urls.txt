@@ -73,6 +73,7 @@ www.bookingholdings.com
 press.priceline.com
 gnip.com
 twitterflightschool.com
+t.co
 3.basecamp.com
 launchpad.37signals.com
 world.hey.com
@@ -266,6 +267,8 @@ uisp.com
 unifi.ui.com
 careers.ui.com
 ispdesign.ui.com
+ca.store.ui.com
+me.store.ui.com
 store.ui.com
 ir.ui.com
 help.ui.com
@@ -281,6 +284,10 @@ www.pornhubpremium.com
 www.pornmd.com
 www.modelhub.com
 www.thumbzilla.com
+www.redtube.com
+www.redtubepremium.com
+www.youporn.com
+www.youpornpremium.com
 staging.airtable.com
 api-staging.airtable.com
 www.airbnb.com
@@ -515,9 +522,7 @@ asiointi.lahitapiola.fi
 api.lahitapiola.fi
 privatetarget-2-secure.zigzag
 privatetarget-1-www.zigzag
-bitaccess.com
 mariadb.org
-sandbox.open-xchange.com
 ota.helium.com
 burrow.helium.systems
 helium-console-dev.herokuapp.com
@@ -622,8 +627,6 @@ dns.alvosec.com
 cloud.alvosec.com
 mail.alvosec.com
 proton-api.alvosec.com
-www.youporn.com
-www.youpornpremium.com
 support.nutanix.com
 ticket.nutanix.com
 my.nutanix.com
@@ -686,6 +689,8 @@ staging-shoppingcart.shipt.com
 shoppingcart.shipt.com
 www.shipt.com
 hosted.weblate.org
+rocket.chat
+cloud.rocket.chat
 parrotlinux.org
 api.prod.cuv-prod.app
 wg.g.cuv-prod.app
@@ -731,8 +736,6 @@ ccloud.yoti.com
 code.yoti.com
 www.yotisign.com
 frankd.yoti.com
-www.redtube.com
-www.redtubepremium.com
 moviecontentfilter.com
 www.moviecontentfilter.com
 briefe.io
@@ -947,9 +950,6 @@ lob-assets.com
 blog.lob.com
 docs.lob.com
 mock.lob.com
-api.znly.co
-rpc.znly.co
-web.zen.ly
 booth.pm
 comic.pixiv.net
 sketch.pixiv.net
@@ -968,9 +968,6 @@ blog.chaturbate.com
 billingsupport.chaturbate.com
 secure.chaturbate.com
 www.cfptime.org
-activities.marriott.com
-towneplacesuites.marriott.com
-careers.marriott.com
 sso.marriott.com
 mgs.marriott.com
 jobs.marriott.com
@@ -979,14 +976,12 @@ gateway*.marriott.com
 dcfgateway*.marriott.com
 marriottfranchisetransactions.marriott.com
 lawmanager.marriott.com
-www.travelagents.marriott.com
 marriott.co.*
 all-inclusive.marriott.com
 reservations.all-inclusive.marriott.com
 marrtool.com
 cpp.marriott.com
 www.marriott.com
-mi.bookmarriott.com
 springhillsuites.marriott.com
 *uat.marriott.com
 eleganthotels.com
@@ -1773,10 +1768,6 @@ accounts.evernote.com
 api.evernote.com
 accounts.stage.evernote.com
 api.stage.evernote.com
-doppler.team
-api.doppler.com
-dashboard.doppler.com
-share.doppler.com
 osd.myndr.nl
 www.myndr.nl
 my.playstation.com
@@ -2806,6 +2797,9 @@ www.aiglife.co.uk
 www.corebridgefinancial.com
 www.cropriskservices.com
 cg.cropriskservices.com
+services.aig.co.il
+www.aig.co.il
+sales.aig.co.il
 app.dropcontact.io
 business.tiktok.com
 ads.tiktok.com
@@ -3314,6 +3308,10 @@ wealth.emaplan.com
 www.getincentive.com
 api.getincentive.com
 home.getincentive.com
+doppler.team
+api.doppler.com
+dashboard.doppler.com
+share.doppler.com
 judge.me
 judge.me
 shop.judge.me
@@ -3388,7 +3386,6 @@ app.varonis.io
 argocd.upchieve.org
 hackers.upchieve.org
 www.lacework.com
-*STATE.GOV
 www.myetherwallet.com
 krisp.ai
 account.krisp.ai
@@ -3419,6 +3416,7 @@ training.epam.com
 games2gether.com
 community.twopointcounty.com
 community.companyofheroes.com
+redeem.footballmanager.com
 Tenable.cs
 Tenable.asm
 exchange.gemini.com
@@ -3445,6 +3443,8 @@ www.redis.com
 www.redislabs.com
 api.redislabs.com
 opensea.io
+moonpay.com
+hypermint.com
 app-sandbox.circle.com
 my-sandbox.circle.com
 api-sandbox.circle.com
@@ -3784,4 +3784,5 @@ monolith.xyz
 blog.token.com
 zerobounce.in
 api.zerobounce.in
+zerobounce.net
 checksw.com
