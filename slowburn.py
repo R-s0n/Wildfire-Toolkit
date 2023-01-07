@@ -283,7 +283,7 @@ def check_vulns(args, domain):
     thisFqdn = res.json()
     if len(thisFqdn['vulns']) < 1:
         print("[!] Nuclei scan returned ZERO impactful results.  Deleting domain...")
-        res = requests.post(f"http://{args.server}:{args.port}/api/fqdn/delete", data={"fqdn":thisFqdn})
+        res = requests.post(f"http://{args.server}:{args.port}/api/fqdn/delete", data=thisFqdn)
 
 def slowburn_domains(args, domains):
     while len(domains) > 0:

@@ -524,8 +524,8 @@ def check_limit(args):
     thisFqdn = get_fqdn_obj(args)
     unique_domain_count = 0
     for lst in thisFqdn['recon']['subdomains']:
-        unique_domain_count += len(lst)
-    if unique_domain_count > 999 and args.limit:
+        unique_domain_count += len(thisFqdn['recon']['subdomains'][lst])
+    if unique_domain_count > 999:
         print("[!] Unique subdomain limit reached!  Ending the scan for now, but you can always come back and run the scan again without the -l|--limit flat.")
         exit()
     print(f"[+] Current unique subdomain count: {unique_domain_count}\n[+] Continuing scan...")
@@ -558,7 +558,11 @@ def arg_parse():
 def main(args):
     starter_timer = Timer()
     print("[-] Running Subdomain Scraping Modules...")
+    if args.limit:
+        print("[-] Unique subdomain limit detected.  Checking count...")
+        check_limit(args)
     try:
+        print(f"[-] Running Amass agains {args.fqdn}")
         amass(args, get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
@@ -570,6 +574,7 @@ def main(args):
         check_limit(args)
     try:
         sublist3r(args, get_home_dir(), get_fqdn_obj(args))
+        print(f"[-] Running Sublist3r agains {args.fqdn}")
     except Exception as e:
         print(f"[!] Exception: {e}")
     if args.timeout:
@@ -580,6 +585,7 @@ def main(args):
         check_limit(args)
     try:
         assetfinder(args, get_home_dir(), get_fqdn_obj(args))
+        print(f"[-] Running Assetfinder agains {args.fqdn}")
     except Exception as e:
         print(f"[!] Exception: {e}")
     if args.timeout:
