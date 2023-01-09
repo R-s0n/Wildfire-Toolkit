@@ -573,8 +573,8 @@ def main(args):
         print("[-] Unique subdomain limit detected.  Checking count...")
         check_limit(args)
     try:
-        sublist3r(args, get_home_dir(), get_fqdn_obj(args))
         print(f"[-] Running Sublist3r against {args.fqdn}")
+        sublist3r(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
     if args.timeout:
@@ -584,8 +584,8 @@ def main(args):
         print("[-] Unique subdomain limit detected.  Checking count...")
         check_limit(args)
     try:
-        assetfinder(args, get_home_dir(), get_fqdn_obj(args))
         print(f"[-] Running Assetfinder against {args.fqdn}")
+        assetfinder(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
     if args.timeout:
@@ -595,8 +595,8 @@ def main(args):
         print("[-] Unique subdomain limit detected.  Checking count...")
         check_limit(args)
     try:
-        gau(args, get_home_dir(), get_fqdn_obj(args))
         print(f"[-] Running Get All URLs against {args.fqdn}")
+        gau(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
     if args.timeout:
@@ -606,8 +606,8 @@ def main(args):
         print("[-] Unique subdomain limit detected.  Checking count...")
         check_limit(args)
     try:
-        crt(args, get_home_dir(), get_fqdn_obj(args))
         print(f"[-] Running CRT against {args.fqdn}")
+        crt(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
     if args.timeout:
@@ -617,8 +617,8 @@ def main(args):
         print("[-] Unique subdomain limit detected.  Checking count...")
         check_limit(args)
     try:
-        shosubgo(args, get_home_dir(), get_fqdn_obj(args))
         print(f"[-] Running Shosubgo against {args.fqdn}")
+        shosubgo(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
     if args.timeout:
@@ -628,8 +628,8 @@ def main(args):
         print("[-] Unique subdomain limit detected.  Checking count...")
         check_limit(args)
     try:
-        subfinder(args, get_home_dir(), get_fqdn_obj(args))
         print(f"[-] Running Subfinder against {args.fqdn}")
+        subfinder(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
     if args.timeout:
@@ -639,6 +639,7 @@ def main(args):
         print("[-] Unique subdomain limit detected.  Checking count...")
         check_limit(args)
     try:
+        print(f"[-] Running Subfinder in Recursive Mode against {args.fqdn}")
         subfinder_recursive(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
@@ -649,8 +650,8 @@ def main(args):
         print("[-] Unique subdomain limit detected.  Checking count...")
         check_limit(args)
     try:
-        github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
         print(f"[-] Running Github-Subdomains against {args.fqdn}")
+        github_subdomains(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
     if args.timeout:
@@ -660,8 +661,8 @@ def main(args):
         print("[-] Unique subdomain limit detected.  Checking count...")
         check_limit(args)
     try:
-        shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
         print(f"[-] Running ShuffleDNS w/ a Default Wordlist against {args.fqdn}")
+        shuffle_dns(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
     if args.timeout:
