@@ -681,13 +681,13 @@ def main(args):
     consolidate(args)
     new_subdomain_length = get_new_subdomain_length(args)
     slack_text = f'The subdomain list for {args.fqdn} has been updated with {new_subdomain_length} new subdomains!'
-    send_slack_notification(get_home_dir(), slack_text)
+    # send_slack_notification(get_home_dir(), slack_text)
     try:
         print(f"[-] Running Httprobe against {args.fqdn}")
         httprobe(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
-    send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args), True))
+    # send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args), True))
     build_crawl_list(get_fqdn_obj(args))
     if args.limit:
         print("[-] Unique subdomain limit detected.  Checking count...")
@@ -726,13 +726,13 @@ def main(args):
     consolidate(args)
     new_subdomain_length = get_new_subdomain_length(args)
     slack_text = f'The subdomain list for {args.fqdn} has been updated with {new_subdomain_length} new subdomains!'
-    send_slack_notification(get_home_dir(), slack_text)
+    # send_slack_notification(get_home_dir(), slack_text)
     try:
         print(f"[-] Running Httprobe against {args.fqdn}")
         httprobe(args, get_home_dir(), get_fqdn_obj(args))
     except Exception as e:
         print(f"[!] Exception: {e}")
-    send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args), False))
+    # send_slack_notification(get_home_dir(), get_live_server_text(args, get_fqdn_obj(args), False))
     populate_burp(args, get_fqdn_obj(args))
     remove_wordlists()
     starter_timer.stop_timer()

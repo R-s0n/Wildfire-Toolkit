@@ -342,7 +342,7 @@ def arg_parse():
     return parser.parse_args()
 
 def main(args):
-    # initialize()
+    initialize()
     urls = get_url_list()
     domains = get_domain_list()
     domain_count = len(domains)
